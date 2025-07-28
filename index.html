@@ -1,12 +1,435 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>Peeeew</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本截图上传工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 2;
+        }
+        .file-list-container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            max-width: 350px;
+        }
+        .file-list {
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+            max-height: 500px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+        .file-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .file-list li:hover {
+            background-color: #f0f7ff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .thumbnail-container {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 8px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .thumbnail-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .file-info {
+            width: 100%;
+            text-align: center;
+        }
+        .file-name {
+            font-size: 12px;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        .file-date {
+            font-size: 10px;
+            color: #666;
+        }
+        .file-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .refresh-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .refresh-btn:hover {
+            background-color: #0056b3;
+        }
+        .text-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            color: #0c5460;
+            background-color: #d1ecf1;
+        }
+    </style>
 </head>
 <body>
+    <div class="main-container">
+        <div class="container">
+            <h1>文本截图上传工具</h1>
+            
+            <textarea id="textInput" class="text-input" placeholder="请输入要截图的文本内容..."></textarea>
+            
+            <button id="captureBtn" class="button">截图并上传</button>
+            
+            <div class="preview" id="previewContainer">
+                <!-- 截图预览将显示在这里 -->
+            </div>
+            
+            <div id="statusMessage" class="status" style="display: none;"></div>
+        </div>
+        
+        <div class="file-list-container">
+            <div class="file-list-header">
+                <h2>最新图片</h2>
+                <button id="refreshBtn" class="refresh-btn">刷新</button>
+            </div>
+            <ul id="fileList" class="file-list">
+                <li>正在加载最新图片...</li>
+            </ul>
+        </div>
+    </div>
 
-<h1>hello world!</h1>
+    <script>
+        // 初始化 COS 实例
+        let cos = null;
+        
+        function initCOS() {
+            if (window.COS) {
+                cos = new COS({
+                    SecretId: 'AKIDtujX8XjiU5VikZEiz3tVu881hBRUJ1Xt',
+                    SecretKey: 'NYVAsWPIEGA3ANUk3NXYLvKWildMxZ5S',
+                });
+                return Promise.resolve(cos);
+            }
+            return Promise.reject(new Error('COS SDK 未正确加载'));
+        }
 
+        // 获取文件列表（只获取最新的10张图片）
+        async function getFileList() {
+            if (!cos) {
+                try {
+                    await initCOS();
+                if (!cos || !cos.getBucket) {
+                        throw new Error('COS SDK 方法不可用');
+                    }
+                } catch (error) {
+                    console.error('COS初始化失败:', error);
+                    return [];
+                }
+            }
+            
+            return new Promise((resolve) => {
+                cos.getBucket({
+                    Bucket: 'debate-1255580927',
+                    Region: 'ap-nanjing',
+                    Prefix: 'screenshots/',
+                    MaxKeys: 100
+                }, function(err, data) {
+                    if (err) {
+                        console.error('获取文件列表失败:', err);
+                        resolve([]);
+                        return;
+                    }
+                    
+                    console.log('获取到的文件列表:', data.Contents);
+                    // 筛选图片文件并按时间排序
+                    const imageFiles = (data.Contents || [])
+                        .filter(item => 
+                            item.Key.toLowerCase().endsWith('.png') || 
+                            item.Key.toLowerCase().endsWith('.jpg') || 
+                            item.Key.toLowerCase().endsWith('.jpeg')
+                        )
+                        .sort((a, b) => new Date(b.LastModified) - new Date(a.LastModified))
+                        .slice(0, 10);
+                    
+                    const files = imageFiles.map(item => ({
+                        key: item.Key,
+                        lastModified: item.LastModified,
+                        size: item.Size,
+                        url: `https://debate-1255580927.cos.ap-nanjing.myqcloud.com/${encodeURIComponent(item.Key)}`
+                    }));
+                    
+                    resolve(files);
+                });
+            });
+        }
+
+        // 更新文件列表显示
+        async function updateFileList() {
+            const fileListElement = document.getElementById('fileList');
+            fileListElement.innerHTML = '<li>正在加载最新图片...</li>';
+            
+            try {
+                const files = await getFileList();
+                
+                if (files.length === 0) {
+                    fileListElement.innerHTML = '<li>没有找到图片</li>';
+                    return;
+                }
+                
+                // 更新列表
+                fileListElement.innerHTML = '';
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    
+                    // 缩略图容器
+                    const thumbnailContainer = document.createElement('div');
+                    thumbnailContainer.className = 'thumbnail-container';
+                    
+                    // 缩略图
+                    const img = document.createElement('img');
+                    img.src = file.url;
+                    img.onerror = () => {
+                        img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE0IDJINVY0SDNWNkgxVjIwSDIzVjZIMjFWNEgxOVYySDE0Wk0xNCA0SDE3VjZIMTRWNFpNNyA0SDEwVjZIN1Y0Wk0zIDhIMjFWMThIM1Y4WiIgZmlsbD0iIzAwN2JmZiIvPjwvc3ZnPg==';
+                    };
+                    thumbnailContainer.appendChild(img);
+                    li.appendChild(thumbnailContainer);
+                    
+                    // 文件信息
+                    const fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info';
+                    
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = file.key.split('/').pop().length > 20 ? 
+                        file.key.split('/').pop().substring(0, 17) + '...' : file.key.split('/').pop();
+                    
+                    const fileDate = document.createElement('div');
+                    fileDate.className = 'file-date';
+                    fileDate.textContent = new Date(file.lastModified).toLocaleString();
+                    
+                    fileInfo.appendChild(fileName);
+                    fileInfo.appendChild(fileDate);
+                    li.appendChild(fileInfo);
+                    
+                    // 点击打开文件
+                    li.addEventListener('click', () => {
+                        window.open(file.url, '_blank');
+                    });
+                    
+                    fileListElement.appendChild(li);
+                });
+            } catch (error) {
+                console.error('更新图片列表失败:', error);
+                fileListElement.innerHTML = `<li>获取图片列表失败: ${error.message}</li>`;
+            }
+        }
+
+        // 初始化页面
+        async function initPage() {
+            try {
+                await initCOS();
+                await updateFileList();
+            } catch (error) {
+                console.error('初始化页面失败:', error);
+                document.getElementById('fileList').innerHTML = 
+                    `<li>初始化失败: ${error.message}</li>`;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+        
+        // 刷新按钮点击事件
+        document.getElementById('refreshBtn').addEventListener('click', updateFileList);
+        
+        // 截图上传按钮点击事件
+        document.getElementById('captureBtn').addEventListener('click', captureAndUpload);
+        
+        async function captureAndUpload() {
+            const textInput = document.getElementById('textInput');
+            const previewContainer = document.getElementById('previewContainer');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // 显示加载状态
+            statusMessage.style.display = 'block';
+            statusMessage.className = 'status loading';
+            statusMessage.textContent = '正在生成截图...';
+            
+            try {
+                // 使用html2canvas生成截图
+                const canvas = await html2canvas(textInput, {
+                    scale: 2, // 提高截图质量
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                // 显示预览
+                previewContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = canvas.toDataURL('image/png');
+                previewContainer.appendChild(img);
+                
+                // 转换为Blob对象
+                canvas.toBlob(async (blob) => {
+                    try {
+                        statusMessage.className = 'status loading';
+                        statusMessage.textContent = '正在上传到腾讯云OSS...';
+                        
+                        // 上传到腾讯云COS
+                        const uploadResult = await uploadToTencentOSS(blob);
+                        
+                        // 上传成功
+                        statusMessage.className = 'status success';
+                        statusMessage.textContent = `上传成功！文件URL: ${uploadResult.url}`;
+                        
+                        // 刷新文件列表
+                        await updateFileList();
+                    } catch (uploadError) {
+                        console.error('上传失败:', uploadError);
+                        statusMessage.className = 'status error';
+                        statusMessage.textContent = `上传失败: ${uploadError.message}`;
+                    }
+                }, 'image/png');
+                
+            } catch (captureError) {
+                console.error('截图失败:', captureError);
+                statusMessage.className = 'status error';
+                statusMessage.textContent = `截图失败: ${captureError.message}`;
+            }
+        }
+        
+        // 腾讯云COS上传函数
+        async function uploadToTencentOSS(blob) {
+            if (!cos) {
+                try {
+                    await initCOS();
+                    if (!cos || !cos.putObject) {
+                        throw new Error('COS SDK 方法不可用');
+                    }
+                } catch (error) {
+                    throw new Error(`初始化COS失败: ${error.message}`);
+                }
+            }
+            
+            // 生成文件名
+            const timestamp = new Date().getTime();
+            const randomStr = Math.random().toString(36).substring(2, 8);
+            const fileName = `screenshots/${timestamp}_${randomStr}.png`;
+            return new Promise((resolve, reject) => {
+                cos.putObject({
+                    Bucket: 'debate-1255580927',
+                    Region: 'ap-nanjing',
+                    Key: fileName,
+                    Body: blob,
+                    ContentType: 'image/png'
+                }, function(err, data) {
+                    if (err) {
+                        console.error('上传到腾讯云COS失败:', err);
+                        reject(err);
+                        return;
+                    }
+                    
+                    // 获取文件URL
+                    const fileUrl = `https://debate-1255580927.cos.ap-nanjing.myqcloud.com/${encodeURIComponent(fileName)}`;
+                    
+                    resolve({
+                        success: true,
+                        url: fileUrl
+                    });
+                });
+            });
+        }
+    </script>
 </body>
 </html>
