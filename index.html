@@ -844,7 +844,7 @@
     <!-- 登录页面 -->
     <div id="login-container" style="display: none;">
         <h1>腾讯云COS登录</h1>
-        <p>请输入您的腾讯云COS访问凭证以继续使用文本截图上传工具</p>
+        <p>请输入您的腾讯云COS访问凭证以查看图片</p>
         
         <div class="form-group">
             <label for="secretId">SecretId</label>
@@ -863,14 +863,13 @@
     <!-- 应用主内容 -->
     <div id="app-container" style="display: none;">
         <div class="app-header">
-            <h1>文本截图上传工具</h1>
+            <h1>图片查看器</h1>
             <button id="logoutBtn" class="logout-btn">退出登录</button>
         </div>
         
         <!-- Tab切换按钮 -->
         <div class="tabs">
             <div id="tab-images" class="tab active">最新图片</div>
-            <!-- <div id="tab-upload" class="tab">文本截图上传</div> -->
         </div>
         
         <!-- 最新图片Tab内容 -->
@@ -883,21 +882,6 @@
                 <ul id="fileList" class="file-list">
                     <li>正在加载最新图片...</li>
                 </ul>
-            </div>
-        </div>
-        
-        <!-- 文本截图上传Tab内容 -->
-        <div id="content-upload" class="tab-content">
-            <div class="container">
-                <textarea id="textInput" class="text-input" placeholder="请输入要截图的文本内容..."></textarea>
-                
-                <button id="captureBtn" class="button">截图并上传</button>
-                
-                <div class="preview" id="previewContainer">
-                    <!-- 截图预览将显示在这里 -->
-                </div>
-                
-                <div id="statusMessage" class="status" style="display: none;"></div>
             </div>
         </div>
     </div>
@@ -1556,18 +1540,12 @@
             // 绑定退出登录按钮事件
             document.getElementById('logoutBtn').addEventListener('click', logout);
             
-            // 绑定截图按钮事件
-            document.getElementById('captureBtn').addEventListener('click', captureAndUpload);
-            
             // 绑定刷新按钮事件
             document.getElementById('refreshBtn').addEventListener('click', updateFileList);
             
             // 绑定Tab切换事件
             document.getElementById('tab-images').addEventListener('click', function() {
                 switchTab('images');
-            });
-            document.getElementById('tab-upload').addEventListener('click', function() {
-                switchTab('upload');
             });
             
             // 为SecretKey输入框添加回车键登录功能
@@ -1578,108 +1556,7 @@
             });
         });
         
-        async function captureAndUpload() {
-            const textInput = document.getElementById('textInput');
-            const previewContainer = document.getElementById('previewContainer');
-            const statusMessage = document.getElementById('statusMessage');
-            
-            // 显示加载状态
-            statusMessage.style.display = 'block';
-            statusMessage.className = 'status loading';
-            statusMessage.textContent = '正在生成截图...';
-            
-            // 检查COS是否已初始化
-            if (!cos) {
-                statusMessage.className = 'status error';
-                statusMessage.textContent = 'COS未初始化，请先登录';
-                return;
-            }
-            
-            try {
-                // 使用html2canvas生成截图
-                const canvas = await html2canvas(textInput, {
-                    scale: 2, // 提高截图质量
-                    logging: false,
-                    useCORS: true,
-                    allowTaint: true
-                });
-                
-                // 显示预览
-                previewContainer.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = canvas.toDataURL('image/png');
-                previewContainer.appendChild(img);
-                
-                // 转换为Blob对象
-                canvas.toBlob(async (blob) => {
-                    try {
-                        statusMessage.className = 'status loading';
-                        statusMessage.textContent = '正在上传到腾讯云OSS...';
-                        
-                        // 上传到腾讯云COS
-                        const uploadResult = await uploadToTencentOSS(blob);
-                        
-                        // 上传成功
-                        statusMessage.className = 'status success';
-                        statusMessage.textContent = `上传成功！文件URL: ${uploadResult.url}`;
-                        
-                        // 刷新文件列表
-                        await updateFileList();
-                    } catch (uploadError) {
-                        console.error('上传失败:', uploadError);
-                        statusMessage.className = 'status error';
-                        statusMessage.textContent = `上传失败: ${uploadError.message}`;
-                    }
-                }, 'image/png');
-                
-            } catch (captureError) {
-                console.error('截图失败:', captureError);
-                statusMessage.className = 'status error';
-                statusMessage.textContent = `截图失败: ${captureError.message}`;
-            }
-        }
-        
-        // 腾讯云COS上传函数
-        async function uploadToTencentOSS(blob) {
-            if (!cos) {
-                try {
-                    await initCOS();
-                    if (!cos || !cos.putObject) {
-                        throw new Error('COS SDK 方法不可用');
-                    }
-                } catch (error) {
-                    throw new Error(`初始化COS失败: ${error.message}`);
-                }
-            }
-            
-            // 生成文件名
-            const timestamp = new Date().getTime();
-            const randomStr = Math.random().toString(36).substring(2, 8);
-            const fileName = `screenshots/${timestamp}_${randomStr}.png`;
-            return new Promise((resolve, reject) => {
-                cos.putObject({
-                    Bucket: 'debate-1255580927',
-                    Region: 'ap-nanjing',
-                    Key: fileName,
-                    Body: blob,
-                    ContentType: 'image/png'
-                }, function(err, data) {
-                    if (err) {
-                        console.error('上传到腾讯云COS失败:', err);
-                        reject(err);
-                        return;
-                    }
-                    
-                    // 获取文件URL
-                    const fileUrl = `https://debate-1255580927.cos.ap-nanjing.myqcloud.com/${encodeURIComponent(fileName)}`;
-                    
-                    resolve({
-                        success: true,
-                        url: fileUrl
-                    });
-                });
-            });
-        }
+
     </script>
 </body>
 </html>
