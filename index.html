@@ -15,6 +15,55 @@
             padding: 20px;
             line-height: 1.6;
         }
+        
+        /* 登录页面样式 */
+        #login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        #app-container {
+            display: none; /* 初始隐藏应用内容 */
+        }
         h1 {
             color: #333;
             text-align: center;
@@ -146,6 +195,8 @@
             margin-top: 20px;
             padding: 10px;
             border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
         }
         .success {
             background-color: #d4edda;
@@ -159,44 +210,101 @@
             color: #0c5460;
             background-color: #d1ecf1;
         }
+        
+        /* 登录页面错误消息样式 */
+        #loginMessage {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        /* 添加退出登录按钮样式 */
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="container">
-            <h1>文本截图上传工具</h1>
-            
-            <textarea id="textInput" class="text-input" placeholder="请输入要截图的文本内容..."></textarea>
-            
-            <button id="captureBtn" class="button">截图并上传</button>
-            
-            <div class="preview" id="previewContainer">
-                <!-- 截图预览将显示在这里 -->
-            </div>
-            
-            <div id="statusMessage" class="status" style="display: none;"></div>
+    <!-- 登录页面 -->
+    <div id="login-container">
+        <h1>腾讯云COS登录</h1>
+        <p>请输入您的腾讯云COS访问凭证以继续使用文本截图上传工具</p>
+        
+        <div class="form-group">
+            <label for="secretId">SecretId</label>
+            <input type="text" id="secretId" placeholder="请输入您的SecretId">
         </div>
         
-        <div class="file-list-container">
-            <div class="file-list-header">
-                <h2>最新图片</h2>
-                <button id="refreshBtn" class="refresh-btn">刷新</button>
+        <div class="form-group">
+            <label for="secretKey">SecretKey</label>
+            <input type="password" id="secretKey" placeholder="请输入您的SecretKey">
+        </div>
+        
+        <button id="loginBtn" class="login-btn">登录</button>
+        <div id="loginMessage" class="status" style="display: none; margin-top: 20px;"></div>
+    </div>
+    
+    <!-- 应用主内容 -->
+    <div id="app-container">
+        <div class="main-container">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>文本截图上传工具</h1>
+                    <button id="logoutBtn" class="logout-btn">退出登录</button>
+                </div>
+                
+                <textarea id="textInput" class="text-input" placeholder="请输入要截图的文本内容..."></textarea>
+                
+                <button id="captureBtn" class="button">截图并上传</button>
+                
+                <div class="preview" id="previewContainer">
+                    <!-- 截图预览将显示在这里 -->
+                </div>
+                
+                <div id="statusMessage" class="status" style="display: none;"></div>
             </div>
-            <ul id="fileList" class="file-list">
-                <li>正在加载最新图片...</li>
-            </ul>
+            
+            <div class="file-list-container">
+                <div class="file-list-header">
+                    <h2>最新图片</h2>
+                    <button id="refreshBtn" class="refresh-btn">刷新</button>
+                </div>
+                <ul id="fileList" class="file-list">
+                    <li>正在加载最新图片...</li>
+                </ul>
+            </div>
         </div>
     </div>
 
     <script>
         // 初始化 COS 实例
         let cos = null;
+        let cosCredentials = {
+            secretId: '',
+            secretKey: ''
+        };
         
+        // 初始化COS，使用用户提供的凭证
         function initCOS() {
+            if (!cosCredentials.secretId || !cosCredentials.secretKey) {
+                return Promise.reject(new Error('请先提供有效的腾讯云COS凭证'));
+            }
+            
             if (window.COS) {
                 cos = new COS({
-                    SecretId: '',
-                    SecretKey: '',
+                    SecretId: cosCredentials.secretId,
+                    SecretKey: cosCredentials.secretKey,
                 });
                 return Promise.resolve(cos);
             }
@@ -205,16 +313,10 @@
 
         // 获取文件列表（只获取最新的10张图片）
         async function getFileList() {
+            // 检查COS是否已初始化
             if (!cos) {
-                try {
-                    await initCOS();
-                if (!cos || !cos.getBucket) {
-                        throw new Error('COS SDK 方法不可用');
-                    }
-                } catch (error) {
-                    console.error('COS初始化失败:', error);
-                    return [];
-                }
+                console.error('COS未初始化，请先登录');
+                return [];
             }
             
             return new Promise((resolve) => {
@@ -257,6 +359,12 @@
         async function updateFileList() {
             const fileListElement = document.getElementById('fileList');
             fileListElement.innerHTML = '<li>正在加载最新图片...</li>';
+            
+            // 检查COS是否已初始化
+            if (!cos) {
+                fileListElement.innerHTML = '<li>COS未初始化，请先登录</li>';
+                return;
+            }
             
             try {
                 const files = await getFileList();
@@ -326,14 +434,92 @@
             }
         }
 
+        // 显示登录状态消息
+        function showLoginStatus(message, isError = false) {
+            const statusElement = document.getElementById('loginMessage');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            statusElement.className = isError ? 'status error' : 'status success';
+            
+            // 3秒后自动隐藏成功消息
+            if (!isError) {
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 验证登录凭证并切换到主应用
+        function validateAndLogin() {
+            const secretId = document.getElementById('secretId').value.trim();
+            const secretKey = document.getElementById('secretKey').value.trim();
+            
+            if (!secretId || !secretKey) {
+                showLoginStatus('请输入SecretId和SecretKey', true);
+                return;
+            }
+            
+            // 保存凭证
+            cosCredentials.secretId = secretId;
+            cosCredentials.secretKey = secretKey;
+            
+            // 尝试初始化COS
+            initCOS().then(() => {
+                console.log('COS 初始化成功');
+                // 隐藏登录页面，显示主应用
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                // 加载文件列表
+                updateFileList();
+            }).catch(err => {
+                console.error('COS 初始化失败:', err);
+                showLoginStatus('COS 初始化失败: ' + err.message, true);
+                // 清空凭证
+                cosCredentials.secretId = '';
+                cosCredentials.secretKey = '';
+            });
+        }
+        
+        // 退出登录功能
+        function logout() {
+            // 清空凭证
+            cosCredentials.secretId = '';
+            cosCredentials.secretKey = '';
+            cos = null;
+            
+            // 清空输入框
+            document.getElementById('secretId').value = '';
+            document.getElementById('secretKey').value = '';
+            
+            // 隐藏主应用，显示登录页面
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'block';
+            
+            // 清空状态消息
+            document.getElementById('loginMessage').style.display = 'none';
+        }
+        
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initPage);
-        
-        // 刷新按钮点击事件
-        document.getElementById('refreshBtn').addEventListener('click', updateFileList);
-        
-        // 截图上传按钮点击事件
-        document.getElementById('captureBtn').addEventListener('click', captureAndUpload);
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定登录按钮事件
+            document.getElementById('loginBtn').addEventListener('click', validateAndLogin);
+            
+            // 绑定退出登录按钮事件
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // 绑定截图按钮事件
+            document.getElementById('captureBtn').addEventListener('click', captureAndUpload);
+            
+            // 绑定刷新按钮事件
+            document.getElementById('refreshBtn').addEventListener('click', updateFileList);
+            
+            // 为SecretKey输入框添加回车键登录功能
+            document.getElementById('secretKey').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    validateAndLogin();
+                }
+            });
+        });
         
         async function captureAndUpload() {
             const textInput = document.getElementById('textInput');
@@ -344,6 +530,13 @@
             statusMessage.style.display = 'block';
             statusMessage.className = 'status loading';
             statusMessage.textContent = '正在生成截图...';
+            
+            // 检查COS是否已初始化
+            if (!cos) {
+                statusMessage.className = 'status error';
+                statusMessage.textContent = 'COS未初始化，请先登录';
+                return;
+            }
             
             try {
                 // 使用html2canvas生成截图
