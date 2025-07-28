@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文本截图上传工具</title>
+    <title>图片列表</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
@@ -14,6 +14,170 @@
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
+            box-sizing: border-box;
+        }
+        
+        /* 确保所有元素都使用border-box盒模型 */
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
+        /* 图片模态框样式 */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .image-modal.show {
+            opacity: 1;
+        }
+        
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        /* 缩放控制按钮 */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1002;
+        }
+        
+        @media (max-width: 768px) {
+            .zoom-controls {
+                bottom: 15px;
+                right: 15px;
+                gap: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .zoom-controls {
+                bottom: 10px;
+                right: 10px;
+                gap: 6px;
+            }
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .zoom-btn:hover {
+            background-color: rgba(0, 123, 255, 0.7);
+        }
+        
+        .download-btn {
+            background-color: rgba(40, 167, 69, 0.5);
+        }
+        
+        .download-btn:hover {
+            background-color: rgba(40, 167, 69, 0.8);
+        }
+        
+        .modal-image {
+            max-width: 90%;
+            max-height: 80vh;
+            margin: 0 auto;
+            display: block;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform-origin: center center;
+            cursor: move;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-image {
+                max-width: 95%;
+                max-height: 70vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-image {
+                max-width: 98%;
+                max-height: 60vh;
+            }
+        }
+        
+        .modal-image.loaded {
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #007bff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -25px;
+            margin-left: -25px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal-title {
+            color: white;
+            margin-top: 15px;
+            font-size: 16px;
+            text-align: center;
+            max-width: 90%;
+            word-break: break-all;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .close-modal:hover {
+            color: #007bff;
         }
         
         /* 登录页面样式 */
@@ -24,6 +188,7 @@
             border-radius: 8px;
             padding: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
         }
         
         .form-group {
@@ -45,6 +210,38 @@
             font-size: 16px;
         }
         
+        @media (max-width: 768px) {
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group label {
+                margin-bottom: 6px;
+                font-size: 14px;
+            }
+            
+            .form-group input {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-group {
+                margin-bottom: 12px;
+            }
+            
+            .form-group label {
+                margin-bottom: 4px;
+                font-size: 13px;
+            }
+            
+            .form-group input {
+                padding: 7px;
+                font-size: 13px;
+            }
+        }
+        
         .login-btn {
             background-color: #007bff;
             color: white;
@@ -61,16 +258,217 @@
             background-color: #0056b3;
         }
         
+        @media (max-width: 768px) {
+            .login-btn {
+                padding: 10px 16px;
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-btn {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+        }
+        
         #app-container {
             display: none; /* 初始隐藏应用内容 */
+        }
+        
+        /* Tab切换样式 */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        
+        .tab {
+            padding: 12px 30px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin: 0 8px;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab:hover {
+            background-color: #e9f0f7;
+        }
+        
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 -2px 8px rgba(0, 123, 255, 0.2);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #0056b3;
+        }
+        
+        /* 响应式Tab样式 */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: row;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .tab {
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                margin: 0 4px;
+                font-size: 14px;
+            }
+            
+            .tab.active::after {
+                height: 2px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tabs {
+                margin-bottom: 15px;
+                border-bottom-width: 1px;
+            }
+            
+            .tab {
+                padding: 8px 5px;
+                margin: 0 2px;
+                font-size: 12px;
+                border-width: 1px;
+            }
+            
+            .tab.active::after {
+                height: 1px;
+            }
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         h1 {
             color: #333;
             text-align: center;
         }
         .main-container {
-            display: flex;
-            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .file-list {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 10px;
+                grid-auto-flow: row;
+            }
+            
+            .thumbnail-container {
+                height: 120px;
+            }
+            
+            /* 调整应用标题和退出按钮的布局 */
+            #app-container > div:first-child {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            #app-container > div:first-child h1 {
+                margin-bottom: 10px;
+            }
+            
+            /* 调整登录容器 */
+            #login-container {
+                margin: 50px auto;
+                padding: 20px;
+                width: 90%;
+            }
+        }
+        
+        /* 小屏幕手机适配 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .file-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+            }
+            
+            .thumbnail-container {
+                height: 100px;
+            }
+            
+            .file-name {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .file-date {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+            
+            .view-button {
+                font-size: 11px !important;
+                padding: 3px 6px !important;
+            }
+            
+            .zoom-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .close-modal {
+                top: 10px;
+                right: 15px;
+                font-size: 30px;
+            }
         }
         .container {
             background-color: #f9f9f9;
@@ -85,36 +483,56 @@
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             flex: 1;
-            max-width: 350px;
+            width: 100%;
         }
         .file-list {
             list-style: none;
             padding: 10px;
             margin: 0;
-            max-height: 500px;
+            max-height: 800px;
             overflow-y: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            grid-auto-flow: row;
         }
         .file-list li {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            padding: 15px;
+            border: 1px solid #eee;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            margin-bottom: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .file-list li {
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .file-list li {
+                padding: 8px;
+            }
         }
         .file-list li:hover {
             background-color: #f0f7ff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        .file-list .file-item {
+            width: 100%;
         }
         .thumbnail-container {
             width: 100%;
-            height: 120px;
+            height: 160px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -122,24 +540,39 @@
             margin-bottom: 8px;
             background-color: #f5f5f5;
             border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         .thumbnail-container img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
         }
         .file-info {
             width: 100%;
             text-align: center;
+            padding-top: 10px;
         }
         .file-name {
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: 14px;
+            margin-bottom: 6px;
             word-break: break-all;
+            font-weight: bold;
+            color: #333;
         }
         .file-date {
-            font-size: 10px;
+            font-size: 12px;
             color: #666;
+            margin-bottom: 8px;
+        }
+        .view-button:hover {
+            background-color: #0056b3 !important;
         }
         .file-list-header {
             display: flex;
@@ -158,6 +591,29 @@
         }
         .refresh-btn:hover {
             background-color: #0056b3;
+        }
+        
+        @media (max-width: 768px) {
+            .file-list-header {
+                margin-bottom: 8px;
+            }
+            .refresh-btn {
+                padding: 4px 8px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .file-list-header {
+                margin-bottom: 6px;
+                flex-direction: column;
+                gap: 5px;
+                align-items: flex-start;
+            }
+            .refresh-btn {
+                padding: 3px 6px;
+                font-size: 12px;
+            }
         }
         .text-input {
             width: 100%;
@@ -182,6 +638,34 @@
         .button:hover {
             background-color: #0056b3;
         }
+        
+        @media (max-width: 768px) {
+            .text-input {
+                min-height: 180px;
+                padding: 8px;
+                font-size: 15px;
+                margin-bottom: 15px;
+            }
+            .button {
+                padding: 8px 16px;
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .text-input {
+                min-height: 150px;
+                padding: 6px;
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+            .button {
+                padding: 7px 14px;
+                font-size: 14px;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
         .preview {
             margin-top: 20px;
             text-align: center;
@@ -190,6 +674,22 @@
             max-width: 100%;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .preview {
+                margin-top: 15px;
+            }
+            .preview img {
+                border-width: 1px;
+                border-radius: 3px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .preview {
+                margin-top: 12px;
+            }
         }
         .status {
             margin-top: 20px;
@@ -211,10 +711,49 @@
             background-color: #d1ecf1;
         }
         
+        @media (max-width: 768px) {
+            .status {
+                margin-top: 15px;
+                padding: 8px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .status {
+                margin-top: 12px;
+                padding: 6px;
+                font-size: 12px;
+            }
+        }
+        
         /* 登录页面错误消息样式 */
         #loginMessage {
             margin-top: 15px;
             font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            #loginMessage {
+                margin-top: 12px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #loginMessage {
+                margin-top: 10px;
+                font-size: 12px;
+            }
+        }
+        
+        /* 应用标题和退出按钮样式 */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
         /* 添加退出登录按钮样式 */
@@ -233,11 +772,77 @@
         .logout-btn:hover {
             background-color: #d32f2f;
         }
+        
+        /* 加载指示器样式 */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        
+        .loading-spinner-main {
+            border: 5px solid rgba(0, 123, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #007bff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: #007bff;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .logout-btn {
+                margin-left: 0;
+                padding: 6px 12px;
+            }
+            
+            .loading-spinner-main {
+                width: 40px;
+                height: 40px;
+                border-width: 4px;
+            }
+            
+            .loading-text {
+                font-size: 14px;
+                margin-top: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .loading-spinner-main {
+                width: 35px;
+                height: 35px;
+                border-width: 3px;
+            }
+            
+            .loading-text {
+                font-size: 13px;
+                margin-top: 12px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 加载指示器 -->
+    <div id="loading-container" class="loading-container">
+        <div class="loading-spinner-main"></div>
+        <p class="loading-text">正在加载，请稍候...</p>
+    </div>
+    
     <!-- 登录页面 -->
-    <div id="login-container">
+    <div id="login-container" style="display: none;">
         <h1>腾讯云COS登录</h1>
         <p>请输入您的腾讯云COS访问凭证以继续使用文本截图上传工具</p>
         
@@ -256,14 +861,34 @@
     </div>
     
     <!-- 应用主内容 -->
-    <div id="app-container">
-        <div class="main-container">
-            <div class="container">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>文本截图上传工具</h1>
-                    <button id="logoutBtn" class="logout-btn">退出登录</button>
+    <div id="app-container" style="display: none;">
+        <div class="app-header">
+            <h1>文本截图上传工具</h1>
+            <button id="logoutBtn" class="logout-btn">退出登录</button>
+        </div>
+        
+        <!-- Tab切换按钮 -->
+        <div class="tabs">
+            <div id="tab-images" class="tab active">最新图片</div>
+            <!-- <div id="tab-upload" class="tab">文本截图上传</div> -->
+        </div>
+        
+        <!-- 最新图片Tab内容 -->
+        <div id="content-images" class="tab-content active">
+            <div class="file-list-container">
+                <div class="file-list-header">
+                    <h2>最新图片</h2>
+                    <button id="refreshBtn" class="refresh-btn">刷新</button>
                 </div>
-                
+                <ul id="fileList" class="file-list">
+                    <li>正在加载最新图片...</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 文本截图上传Tab内容 -->
+        <div id="content-upload" class="tab-content">
+            <div class="container">
                 <textarea id="textInput" class="text-input" placeholder="请输入要截图的文本内容..."></textarea>
                 
                 <button id="captureBtn" class="button">截图并上传</button>
@@ -274,15 +899,21 @@
                 
                 <div id="statusMessage" class="status" style="display: none;"></div>
             </div>
-            
-            <div class="file-list-container">
-                <div class="file-list-header">
-                    <h2>最新图片</h2>
-                    <button id="refreshBtn" class="refresh-btn">刷新</button>
-                </div>
-                <ul id="fileList" class="file-list">
-                    <li>正在加载最新图片...</li>
-                </ul>
+        </div>
+    </div>
+
+    <!-- 图片模态框 -->
+    <div id="imageModal" class="image-modal">
+        <span class="close-modal" onclick="closeImageModal()">&times;</span>
+        <div class="modal-content">
+            <div id="loadingSpinner" class="loading-spinner"></div>
+            <img id="modalImage" class="modal-image" src="" alt="大图预览">
+            <div id="modalTitle" class="modal-title"></div>
+            <div class="zoom-controls">
+                <div class="zoom-btn" onclick="zoomImage('out')">-</div>
+                <div class="zoom-btn" onclick="zoomImage('reset')">⟲</div>
+                <div class="zoom-btn" onclick="zoomImage('in')">+</div>
+                <div class="zoom-btn download-btn" onclick="downloadImage()" title="下载图片">↓</div>
             </div>
         </div>
     </div>
@@ -358,11 +989,11 @@
         // 更新文件列表显示
         async function updateFileList() {
             const fileListElement = document.getElementById('fileList');
-            fileListElement.innerHTML = '<li>正在加载最新图片...</li>';
+            fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">正在加载最新图片...</li>';
             
             // 检查COS是否已初始化
             if (!cos) {
-                fileListElement.innerHTML = '<li>COS未初始化，请先登录</li>';
+                fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">COS未初始化，请先登录</li>';
                 return;
             }
             
@@ -370,7 +1001,7 @@
                 const files = await getFileList();
                 
                 if (files.length === 0) {
-                    fileListElement.innerHTML = '<li>没有找到图片</li>';
+                    fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">暂无图片</li>';
                     return;
                 }
                 
@@ -378,6 +1009,7 @@
                 fileListElement.innerHTML = '';
                 files.forEach(file => {
                     const li = document.createElement('li');
+                    li.className = 'file-item';
                     
                     // 缩略图容器
                     const thumbnailContainer = document.createElement('div');
@@ -386,6 +1018,7 @@
                     // 缩略图
                     const img = document.createElement('img');
                     img.src = file.url;
+                    img.loading = 'lazy'; // 延迟加载图片
                     img.onerror = () => {
                         img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE0IDJINVY0SDNWNkgxVjIwSDIzVjZIMjFWNEgxOVYySDE0Wk0xNCA0SDE3VjZIMTRWNFpNNyA0SDEwVjZIN1Y0Wk0zIDhIMjFWMThIM1Y4WiIgZmlsbD0iIzAwN2JmZiIvPjwvc3ZnPg==';
                     };
@@ -405,28 +1038,334 @@
                     fileDate.className = 'file-date';
                     fileDate.textContent = new Date(file.lastModified).toLocaleString();
                     
+                    // 添加查看原图按钮
+                    const viewButton = document.createElement('button');
+                    viewButton.className = 'view-button';
+                    viewButton.textContent = '查看原图';
+                    viewButton.style.display = 'inline-block';
+                    viewButton.style.marginTop = '8px';
+                    viewButton.style.padding = '4px 8px';
+                    viewButton.style.backgroundColor = '#007bff';
+                    viewButton.style.color = 'white';
+                    viewButton.style.border = 'none';
+                    viewButton.style.borderRadius = '4px';
+                    viewButton.style.textDecoration = 'none';
+                    viewButton.style.fontSize = '12px';
+                    viewButton.style.cursor = 'pointer';
+                    
+                    // 点击按钮显示大图
+                    viewButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showImageModal(file.url, file.key.split('/').pop());
+                    });
+                    
                     fileInfo.appendChild(fileName);
                     fileInfo.appendChild(fileDate);
+                    fileInfo.appendChild(viewButton);
                     li.appendChild(fileInfo);
                     
-                    // 点击打开文件
-                    li.addEventListener('click', () => {
-                        window.open(file.url, '_blank');
+                    // 点击缩略图显示大图
+                    thumbnailContainer.addEventListener('click', () => {
+                        showImageModal(file.url, file.key.split('/').pop());
                     });
                     
                     fileListElement.appendChild(li);
                 });
             } catch (error) {
                 console.error('更新图片列表失败:', error);
-                fileListElement.innerHTML = `<li>获取图片列表失败: ${error.message}</li>`;
+                fileListElement.innerHTML = `<li style="grid-column: 1 / -1; text-align: center;">获取图片列表失败: ${error.message}</li>`;
             }
         }
 
+        // 显示图片模态框
+        function showImageModal(imageUrl, title) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            // 重置状态
+            modalImg.classList.remove('loaded');
+            spinner.style.display = 'block';
+            
+            // 设置标题
+            modalTitle.textContent = title || '';
+            
+            // 显示模态框
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+            
+            // 图片加载完成事件
+            modalImg.onload = function() {
+                spinner.style.display = 'none';
+                modalImg.classList.add('loaded');
+            };
+            
+            // 图片加载失败事件
+            modalImg.onerror = function() {
+                spinner.style.display = 'none';
+                modalImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE0IDJINVY0SDNWNkgxVjIwSDIzVjZIMjFWNEgxOVYySDE0Wk0xNCA0SDE3VjZIMTRWNFpNNyA0SDEwVjZIN1Y0Wk0zIDhIMjFWMThIM1Y4WiIgZmlsbD0iI2ZmZmZmZiIvPjwvc3ZnPg==';
+                modalImg.classList.add('loaded');
+                modalTitle.textContent = '图片加载失败';
+            };
+            
+            // 设置图片源（放在最后以触发加载事件）
+            modalImg.src = imageUrl;
+            
+            // 阻止滚动
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 图片缩放状态
+        let currentZoom = 1;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let imgOffsetX = 0;
+        let imgOffsetY = 0;
+        let isDragging = false;
+        
+        // 缩放图片
+        function zoomImage(action) {
+            const modalImg = document.getElementById('modalImage');
+            
+            switch(action) {
+                case 'in':
+                    currentZoom = Math.min(currentZoom + 0.25, 3); // 最大放大3倍
+                    break;
+                case 'out':
+                    currentZoom = Math.max(currentZoom - 0.25, 0.5); // 最小缩小0.5倍
+                    break;
+                case 'reset':
+                    currentZoom = 1;
+                    imgOffsetX = 0;
+                    imgOffsetY = 0;
+                    break;
+            }
+            
+            // 应用缩放和位移
+            modalImg.style.transform = `scale(${currentZoom}) translate(${imgOffsetX}px, ${imgOffsetY}px)`;
+        }
+        
+        // 初始化图片拖动功能
+        function initImageDrag() {
+            const modalImg = document.getElementById('modalImage');
+            const modal = document.getElementById('imageModal');
+            let lastTouchDistance = 0;
+            
+            // 鼠标按下事件
+            modalImg.addEventListener('mousedown', function(e) {
+                if (currentZoom <= 1) return; // 只有放大时才能拖动
+                
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                
+                // 防止拖动时选中图片
+                e.preventDefault();
+            });
+            
+            // 鼠标移动事件
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = (e.clientX - dragStartX) / currentZoom;
+                const deltaY = (e.clientY - dragStartY) / currentZoom;
+                
+                imgOffsetX += deltaX;
+                imgOffsetY += deltaY;
+                
+                modalImg.style.transform = `scale(${currentZoom}) translate(${imgOffsetX}px, ${imgOffsetY}px)`;
+                
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            });
+            
+            // 鼠标释放事件
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            // 鼠标离开事件
+            document.addEventListener('mouseleave', function() {
+                isDragging = false;
+            });
+            
+            // 触摸开始事件
+            modalImg.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    // 单指触摸 - 准备拖动
+                    if (currentZoom <= 1) return;
+                    
+                    isDragging = true;
+                    dragStartX = e.touches[0].clientX;
+                    dragStartY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    // 双指触摸 - 准备缩放
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    lastTouchDistance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                }
+                
+                // 防止页面滚动
+                e.preventDefault();
+            }, { passive: false });
+            
+            // 触摸移动事件
+            modal.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 1 && isDragging) {
+                    // 单指移动 - 拖动图片
+                    const deltaX = (e.touches[0].clientX - dragStartX) / currentZoom;
+                    const deltaY = (e.touches[0].clientY - dragStartY) / currentZoom;
+                    
+                    imgOffsetX += deltaX;
+                    imgOffsetY += deltaY;
+                    
+                    modalImg.style.transform = `scale(${currentZoom}) translate(${imgOffsetX}px, ${imgOffsetY}px)`;
+                    
+                    dragStartX = e.touches[0].clientX;
+                    dragStartY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    // 双指移动 - 缩放图片
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const currentDistance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                    
+                    if (lastTouchDistance > 0) {
+                        // 计算缩放比例变化
+                        const scaleFactor = currentDistance / lastTouchDistance;
+                        const newZoom = Math.max(0.5, Math.min(3, currentZoom * scaleFactor));
+                        
+                        // 应用新的缩放比例
+                        if (newZoom !== currentZoom) {
+                            currentZoom = newZoom;
+                            modalImg.style.transform = `scale(${currentZoom}) translate(${imgOffsetX}px, ${imgOffsetY}px)`;
+                        }
+                    }
+                    
+                    lastTouchDistance = currentDistance;
+                }
+                
+                // 防止页面滚动
+                e.preventDefault();
+            }, { passive: false });
+            
+            // 触摸结束事件
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+                lastTouchDistance = 0;
+            });
+            
+            // 触摸取消事件
+            document.addEventListener('touchcancel', function() {
+                isDragging = false;
+                lastTouchDistance = 0;
+            });
+        }
+        
+        // 下载当前显示的图片
+        function downloadImage() {
+            const modalImg = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            // 检查图片是否已加载
+            if (!modalImg.classList.contains('loaded')) {
+                alert('图片正在加载中，请稍后再试');
+                return;
+            }
+            
+            // 获取图片URL
+            const imageUrl = modalImg.src;
+            
+            // 创建一个临时链接元素
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageUrl;
+            
+            // 设置下载文件名
+            const fileName = modalTitle.textContent || '图片下载_' + new Date().getTime() + '.png';
+            downloadLink.download = fileName;
+            
+            // 添加到文档中并触发点击
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            
+            // 清理
+            document.body.removeChild(downloadLink);
+        }
+        
+        // 关闭图片模态框
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            // 开始关闭动画
+            modal.classList.remove('show');
+            
+            // 延迟隐藏以完成过渡动画
+            setTimeout(() => {
+                // 隐藏模态框
+                modal.style.display = 'none';
+                
+                // 重置状态
+                modalImg.src = '';
+                modalImg.classList.remove('loaded');
+                modalImg.style.transform = 'scale(1) translate(0px, 0px)';
+                spinner.style.display = 'none';
+                document.getElementById('modalTitle').textContent = '';
+                
+                // 重置缩放状态
+                currentZoom = 1;
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+            }, 300);
+            
+            // 恢复滚动
+            document.body.style.overflow = '';
+        }
+        
         // 初始化页面
         async function initPage() {
             try {
                 await initCOS();
                 await updateFileList();
+                
+                // 初始化图片拖动功能
+                initImageDrag();
+                
+                // 添加ESC键关闭模态框
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        closeImageModal();
+                    }
+                });
+                
+                // 添加鼠标滚轮缩放功能
+                document.getElementById('imageModal').addEventListener('wheel', function(event) {
+                    // 只有当图片已加载时才响应滚轮事件
+                    if (document.getElementById('modalImage').classList.contains('loaded')) {
+                        event.preventDefault();
+                        if (event.deltaY < 0) {
+                            zoomImage('in');
+                        } else {
+                            zoomImage('out');
+                        }
+                    }
+                }, { passive: false });
+                
+                // 点击模态框背景关闭
+                document.getElementById('imageModal').addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        closeImageModal();
+                    }
+                });
             } catch (error) {
                 console.error('初始化页面失败:', error);
                 document.getElementById('fileList').innerHTML = 
@@ -466,9 +1405,30 @@
             // 尝试初始化COS
             initCOS().then(() => {
                 console.log('COS 初始化成功');
+                
+                // 保存凭证到localStorage
+                localStorage.setItem('cosCredentials', JSON.stringify({
+                    secretId: secretId,
+                    secretKey: secretKey
+                }));
+                
                 // 隐藏登录页面，显示主应用
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
+                
+                // 确保默认显示最新图片Tab
+                // 先重置所有tab和内容的active类
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 添加active类到图片tab和对应内容
+                document.getElementById('tab-images').classList.add('active');
+                document.getElementById('content-images').classList.add('active');
+                
                 // 加载文件列表
                 updateFileList();
             }).catch(err => {
@@ -477,6 +1437,8 @@
                 // 清空凭证
                 cosCredentials.secretId = '';
                 cosCredentials.secretKey = '';
+                // 清除localStorage中的凭证
+                localStorage.removeItem('cosCredentials');
             });
         }
         
@@ -486,6 +1448,9 @@
             cosCredentials.secretId = '';
             cosCredentials.secretKey = '';
             cos = null;
+            
+            // 清除localStorage中的凭证
+            localStorage.removeItem('cosCredentials');
             
             // 清空输入框
             document.getElementById('secretId').value = '';
@@ -499,8 +1464,92 @@
             document.getElementById('loginMessage').style.display = 'none';
         }
         
+        // Tab切换功能
+        function switchTab(tabId) {
+            // 移除所有tab和内容的active类
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 添加active类到选中的tab和对应内容
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('content-' + tabId).classList.add('active');
+            
+            // 如果切换到图片列表，刷新列表
+            if (tabId === 'images') {
+                updateFileList();
+            }
+        }
+        
+        // 尝试从localStorage恢复登录状态
+        function tryAutoLogin() {
+            try {
+                // 从localStorage获取保存的凭证
+                const savedCredentials = localStorage.getItem('cosCredentials');
+                if (savedCredentials) {
+                    const credentials = JSON.parse(savedCredentials);
+                    
+                    // 设置凭证
+                    cosCredentials.secretId = credentials.secretId;
+                    cosCredentials.secretKey = credentials.secretKey;
+                    
+                    // 尝试初始化COS
+                    return initCOS().then(() => {
+                        console.log('自动登录成功');
+                        
+                        // 隐藏登录页面，显示主应用
+                        document.getElementById('login-container').style.display = 'none';
+                        document.getElementById('app-container').style.display = 'block';
+                        
+                        // 确保默认显示最新图片Tab
+                        document.getElementById('tab-images').classList.add('active');
+                        document.getElementById('content-images').classList.add('active');
+                        
+                        // 加载文件列表
+                        updateFileList();
+                        
+                        return true;
+                    }).catch(err => {
+                        console.error('自动登录失败:', err);
+                        // 清空凭证
+                        cosCredentials.secretId = '';
+                        cosCredentials.secretKey = '';
+                        // 清除localStorage中的凭证
+                        localStorage.removeItem('cosCredentials');
+                        return false;
+                    });
+                }
+                return Promise.resolve(false);
+            } catch (error) {
+                console.error('尝试自动登录时出错:', error);
+                // 清除可能损坏的凭证
+                localStorage.removeItem('cosCredentials');
+                return Promise.resolve(false);
+            }
+        }
+        
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 尝试自动登录
+            tryAutoLogin().then(autoLoginSuccess => {
+                // 隐藏加载指示器
+                document.getElementById('loading-container').style.display = 'none';
+                
+                if (!autoLoginSuccess) {
+                    // 如果自动登录失败，显示登录页面
+                    document.getElementById('login-container').style.display = 'block';
+                    document.getElementById('app-container').style.display = 'none';
+                }
+            }).catch(error => {
+                // 发生错误时也隐藏加载指示器并显示登录页面
+                console.error('初始化过程中出错:', error);
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('login-container').style.display = 'block';
+            });
+            
             // 绑定登录按钮事件
             document.getElementById('loginBtn').addEventListener('click', validateAndLogin);
             
@@ -512,6 +1561,14 @@
             
             // 绑定刷新按钮事件
             document.getElementById('refreshBtn').addEventListener('click', updateFileList);
+            
+            // 绑定Tab切换事件
+            document.getElementById('tab-images').addEventListener('click', function() {
+                switchTab('images');
+            });
+            document.getElementById('tab-upload').addEventListener('click', function() {
+                switchTab('upload');
+            });
             
             // 为SecretKey输入框添加回车键登录功能
             document.getElementById('secretKey').addEventListener('keypress', function(e) {
