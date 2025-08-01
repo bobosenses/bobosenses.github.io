@@ -782,6 +782,41 @@
             flex-direction: column;
         }
         
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 15px;
+        }
+        
+        .pagination-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        
+        .pagination-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            font-size: 14px;
+            color: #666;
+            font-weight: bold;
+        }
+        
         .loading-spinner-main {
             border: 5px solid rgba(0, 123, 255, 0.3);
             border-radius: 50%;
@@ -870,6 +905,7 @@
         <!-- Tab切换按钮 -->
         <div class="tabs">
             <div id="tab-images" class="tab active">Latest Images</div>
+            <div id="tab-all-images" class="tab">All Images</div>
         </div>
         
         <!-- 最新图片Tab内容 -->
@@ -882,6 +918,25 @@
                 <ul id="fileList" class="file-list">
                     <li>Loading latest images...</li>
                 </ul>
+            </div>
+        </div>
+        
+        <!-- 所有图片Tab内容 -->
+        <div id="content-all-images" class="tab-content">
+            <div class="file-list-container">
+                <div class="file-list-header">
+                    <h2>All Images</h2>
+                    <button id="refreshAllBtn" class="refresh-btn">Refresh</button>
+                </div>
+                <ul id="allFileList" class="file-list">
+                    <li>Loading all images...</li>
+                </ul>
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <button id="prevBtn" class="pagination-btn" disabled>Previous</button>
+                    <span id="pageInfo" class="page-info">Page 1 of 1</span>
+                    <button id="nextBtn" class="pagination-btn" disabled>Next</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1448,6 +1503,180 @@
             document.getElementById('loginMessage').style.display = 'none';
         }
         
+        // 分页相关变量
+        let currentPage = 1;
+        let totalPages = 1;
+        let itemsPerPage = 20;
+        let allImages = [];
+        
+        // 获取所有图片文件列表
+        async function getAllFileList() {
+            if (!cos) {
+                console.error('COS not initialized, please login first');
+                return [];
+            }
+            
+            return new Promise((resolve) => {
+                cos.getBucket({
+                    Bucket: 'debate-1255580927',
+                    Region: 'ap-nanjing',
+                    Prefix: 'screenshots/',
+                    MaxKeys: 1000
+                }, function(err, data) {
+                    if (err) {
+                        console.error('Failed to get all file list:', err);
+                        resolve([]);
+                        return;
+                    }
+                    
+                    console.log('Retrieved all file list:', data.Contents);
+                    // 筛选图片文件并按时间排序
+                    const imageFiles = (data.Contents || [])
+                        .filter(item => 
+                            item.Key.toLowerCase().endsWith('.png') || 
+                            item.Key.toLowerCase().endsWith('.jpg') || 
+                            item.Key.toLowerCase().endsWith('.jpeg')
+                        )
+                        .sort((a, b) => new Date(b.LastModified) - new Date(a.LastModified));
+                    
+                    const files = imageFiles.map(item => ({
+                        key: item.Key,
+                        lastModified: item.LastModified,
+                        size: item.Size,
+                        url: `https://debate-1255580927.cos.ap-nanjing.myqcloud.com/${encodeURIComponent(item.Key)}`
+                    }));
+                    
+                    resolve(files);
+                });
+            });
+        }
+        
+        // 更新所有图片列表显示（带分页）
+        async function updateAllFileList() {
+            const fileListElement = document.getElementById('allFileList');
+            fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">Loading all images...</li>';
+            
+            if (!cos) {
+                fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">COS not initialized, please login first</li>';
+                return;
+            }
+            
+            try {
+                allImages = await getAllFileList();
+                
+                if (allImages.length === 0) {
+                    fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">No images available</li>';
+                    updatePaginationInfo(0, 0);
+                    return;
+                }
+                
+                // 计算总页数
+                totalPages = Math.ceil(allImages.length / itemsPerPage);
+                
+                // 显示当前页的图片
+                displayPageImages();
+                
+                // 更新分页信息
+                updatePaginationInfo(allImages.length, totalPages);
+                
+            } catch (error) {
+                console.error('Failed to update all image list:', error);
+                fileListElement.innerHTML = `<li style="grid-column: 1 / -1; text-align: center;">Failed to get all image list: ${error.message}</li>`;
+            }
+        }
+        
+        // 显示当前页的图片
+        function displayPageImages() {
+            const fileListElement = document.getElementById('allFileList');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageImages = allImages.slice(startIndex, endIndex);
+            
+            fileListElement.innerHTML = '';
+            pageImages.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                
+                const thumbnailContainer = document.createElement('div');
+                thumbnailContainer.className = 'thumbnail-container';
+                
+                const img = document.createElement('img');
+                img.className = 'thumbnail';
+                img.src = file.url;
+                img.alt = file.key.split('/').pop();
+                img.loading = 'lazy';
+                
+                thumbnailContainer.appendChild(img);
+                li.appendChild(thumbnailContainer);
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.key.split('/').pop();
+                fileName.title = file.key.split('/').pop();
+                
+                const fileDate = document.createElement('div');
+                fileDate.className = 'file-date';
+                fileDate.textContent = new Date(file.lastModified).toLocaleString();
+                
+                const viewButton = document.createElement('button');
+                viewButton.className = 'view-button';
+                viewButton.textContent = 'View Original';
+                viewButton.style.display = 'inline-block';
+                viewButton.style.marginTop = '8px';
+                viewButton.style.padding = '4px 8px';
+                viewButton.style.backgroundColor = '#007bff';
+                viewButton.style.color = 'white';
+                viewButton.style.border = 'none';
+                viewButton.style.borderRadius = '4px';
+                viewButton.style.textDecoration = 'none';
+                viewButton.style.fontSize = '12px';
+                viewButton.style.cursor = 'pointer';
+                viewButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showImageModal(file.url, file.key.split('/').pop());
+                });
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileDate);
+                fileInfo.appendChild(viewButton);
+                li.appendChild(fileInfo);
+                
+                thumbnailContainer.addEventListener('click', () => {
+                    showImageModal(file.url, file.key.split('/').pop());
+                });
+                
+                fileListElement.appendChild(li);
+            });
+        }
+        
+        // 更新分页信息
+        function updatePaginationInfo(totalItems, totalPages) {
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${totalItems} images)`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+        
+        // 上一页
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayPageImages();
+                updatePaginationInfo(allImages.length, totalPages);
+            }
+        }
+        
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayPageImages();
+                updatePaginationInfo(allImages.length, totalPages);
+            }
+        }
+        
         // Tab切换功能
         function switchTab(tabId) {
             // 移除所有tab和内容的active类
@@ -1462,9 +1691,11 @@
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('content-' + tabId).classList.add('active');
             
-            // 如果切换到图片列表，刷新列表
+            // 根据tab类型加载对应内容
             if (tabId === 'images') {
                 updateFileList();
+            } else if (tabId === 'all-images') {
+                updateAllFileList();
             }
         }
         
@@ -1542,10 +1773,18 @@
             
             // 绑定刷新按钮事件
             document.getElementById('refreshBtn').addEventListener('click', updateFileList);
+            document.getElementById('refreshAllBtn').addEventListener('click', updateAllFileList);
+            
+            // 绑定分页按钮事件
+            document.getElementById('prevBtn').addEventListener('click', previousPage);
+            document.getElementById('nextBtn').addEventListener('click', nextPage);
             
             // 绑定Tab切换事件
             document.getElementById('tab-images').addEventListener('click', function() {
                 switchTab('images');
+            });
+            document.getElementById('tab-all-images').addEventListener('click', function() {
+                switchTab('all-images');
             });
             
             // 为SecretKey输入框添加回车键登录功能
