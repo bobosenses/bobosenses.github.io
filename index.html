@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片列表</title>
+    <title>Image List</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cos-js-sdk-v5/dist/cos-js-sdk-v5.min.js"></script>
@@ -17,7 +17,7 @@
             box-sizing: border-box;
         }
         
-        /* 确保所有元素都使用border-box盒模型 */
+        /* 确保所有元素使用border-box盒模型 */
         *, *:before, *:after {
             box-sizing: inherit;
         }
@@ -405,7 +405,7 @@
                 height: 120px;
             }
             
-            /* 调整应用标题和退出按钮的布局 */
+            /* 调整应用标题和退出登录按钮布局 */
             #app-container > div:first-child {
                 flex-direction: column;
                 align-items: center;
@@ -424,7 +424,7 @@
             }
         }
         
-        /* 小屏幕手机适配 */
+        /* 小屏幕移动端适配 */
         @media (max-width: 480px) {
             body {
                 padding: 8px;
@@ -747,7 +747,7 @@
             }
         }
         
-        /* 应用标题和退出按钮样式 */
+        /* 应用标题和退出登录按钮样式 */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -838,49 +838,49 @@
     <!-- 加载指示器 -->
     <div id="loading-container" class="loading-container">
         <div class="loading-spinner-main"></div>
-        <p class="loading-text">正在加载，请稍候...</p>
+        <p class="loading-text">Loading, please wait...</p>
     </div>
     
     <!-- 登录页面 -->
     <div id="login-container" style="display: none;">
-        <h1>腾讯云COS登录</h1>
-        <p>请输入您的腾讯云COS访问凭证以查看图片</p>
+        <h1>Tencent Cloud COS Login</h1>
+        <p>Please enter your Tencent Cloud COS access credentials to view images</p>
         
         <div class="form-group">
-            <label for="secretId">SecretId</label>
-            <input type="text" id="secretId" placeholder="请输入您的SecretId">
+            <label for="secretId">Secret ID</label>
+            <input type="text" id="secretId" placeholder="Please enter your Secret ID">
         </div>
         
         <div class="form-group">
-            <label for="secretKey">SecretKey</label>
-            <input type="password" id="secretKey" placeholder="请输入您的SecretKey">
+            <label for="secretKey">Secret Key</label>
+            <input type="password" id="secretKey" placeholder="Please enter your Secret Key">
         </div>
         
-        <button id="loginBtn" class="login-btn">登录</button>
+        <button id="loginBtn" class="login-btn">Login</button>
         <div id="loginMessage" class="status" style="display: none; margin-top: 20px;"></div>
     </div>
     
     <!-- 应用主内容 -->
     <div id="app-container" style="display: none;">
         <div class="app-header">
-            <h1>图片查看器</h1>
-            <button id="logoutBtn" class="logout-btn">退出登录</button>
+            <h1>Image Viewer</h1>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
         </div>
         
         <!-- Tab切换按钮 -->
         <div class="tabs">
-            <div id="tab-images" class="tab active">最新图片</div>
+            <div id="tab-images" class="tab active">Latest Images</div>
         </div>
         
         <!-- 最新图片Tab内容 -->
         <div id="content-images" class="tab-content active">
             <div class="file-list-container">
                 <div class="file-list-header">
-                    <h2>最新图片</h2>
-                    <button id="refreshBtn" class="refresh-btn">刷新</button>
+                    <h2>Latest Images</h2>
+                    <button id="refreshBtn" class="refresh-btn">Refresh</button>
                 </div>
                 <ul id="fileList" class="file-list">
-                    <li>正在加载最新图片...</li>
+                    <li>Loading latest images...</li>
                 </ul>
             </div>
         </div>
@@ -891,13 +891,13 @@
         <span class="close-modal" onclick="closeImageModal()">&times;</span>
         <div class="modal-content">
             <div id="loadingSpinner" class="loading-spinner"></div>
-            <img id="modalImage" class="modal-image" src="" alt="大图预览">
+            <img id="modalImage" class="modal-image" src="" alt="Large Image Preview">
             <div id="modalTitle" class="modal-title"></div>
             <div class="zoom-controls">
                 <div class="zoom-btn" onclick="zoomImage('out')">-</div>
                 <div class="zoom-btn" onclick="zoomImage('reset')">⟲</div>
                 <div class="zoom-btn" onclick="zoomImage('in')">+</div>
-                <div class="zoom-btn download-btn" onclick="downloadImage()" title="下载图片">↓</div>
+                <div class="zoom-btn download-btn" onclick="downloadImage()" title="Download Image">↓</div>
             </div>
         </div>
     </div>
@@ -913,7 +913,7 @@
         // 初始化COS，使用用户提供的凭证
         function initCOS() {
             if (!cosCredentials.secretId || !cosCredentials.secretKey) {
-                return Promise.reject(new Error('请先提供有效的腾讯云COS凭证'));
+                return Promise.reject(new Error('Please provide valid Tencent Cloud COS credentials first'));
             }
             
             if (window.COS) {
@@ -923,14 +923,14 @@
                 });
                 return Promise.resolve(cos);
             }
-            return Promise.reject(new Error('COS SDK 未正确加载'));
+            return Promise.reject(new Error('COS SDK not loaded correctly'));
         }
 
         // 获取文件列表（只获取最新的10张图片）
         async function getFileList() {
             // 检查COS是否已初始化
             if (!cos) {
-                console.error('COS未初始化，请先登录');
+                console.error('COS not initialized, please login first');
                 return [];
             }
             
@@ -942,12 +942,12 @@
                     MaxKeys: 100
                 }, function(err, data) {
                     if (err) {
-                        console.error('获取文件列表失败:', err);
+                        console.error('Failed to get file list:', err);
                         resolve([]);
                         return;
                     }
                     
-                    console.log('获取到的文件列表:', data.Contents);
+                    console.log('Retrieved file list:', data.Contents);
                     // 筛选图片文件并按时间排序
                     const imageFiles = (data.Contents || [])
                         .filter(item => 
@@ -973,11 +973,11 @@
         // 更新文件列表显示
         async function updateFileList() {
             const fileListElement = document.getElementById('fileList');
-            fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">正在加载最新图片...</li>';
+            fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">Loading latest images...</li>';
             
             // 检查COS是否已初始化
             if (!cos) {
-                fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">COS未初始化，请先登录</li>';
+                fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">COS not initialized, please login first</li>';
                 return;
             }
             
@@ -985,7 +985,7 @@
                 const files = await getFileList();
                 
                 if (files.length === 0) {
-                    fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">暂无图片</li>';
+                    fileListElement.innerHTML = '<li style="grid-column: 1 / -1; text-align: center; height: auto;">No images available</li>';
                     return;
                 }
                 
@@ -1025,7 +1025,7 @@
                     // 添加查看原图按钮
                     const viewButton = document.createElement('button');
                     viewButton.className = 'view-button';
-                    viewButton.textContent = '查看原图';
+                    viewButton.textContent = 'View Original';
                     viewButton.style.display = 'inline-block';
                     viewButton.style.marginTop = '8px';
                     viewButton.style.padding = '4px 8px';
@@ -1056,8 +1056,8 @@
                     fileListElement.appendChild(li);
                 });
             } catch (error) {
-                console.error('更新图片列表失败:', error);
-                fileListElement.innerHTML = `<li style="grid-column: 1 / -1; text-align: center;">获取图片列表失败: ${error.message}</li>`;
+                console.error('Failed to update image list:', error);
+                fileListElement.innerHTML = `<li style="grid-column: 1 / -1; text-align: center;">Failed to get image list: ${error.message}</li>`;
             }
         }
 
@@ -1092,7 +1092,7 @@
                 spinner.style.display = 'none';
                 modalImg.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTE0IDJINVY0SDNWNkgxVjIwSDIzVjZIMjFWNEgxOVYySDE0Wk0xNCA0SDE3VjZIMTRWNFpNNyA0SDEwVjZIN1Y0Wk0zIDhIMjFWMThIM1Y4WiIgZmlsbD0iI2ZmZmZmZiIvPjwvc3ZnPg==';
                 modalImg.classList.add('loaded');
-                modalTitle.textContent = '图片加载失败';
+                modalTitle.textContent = 'Image loading failed';
             };
             
             // 设置图片源（放在最后以触发加载事件）
@@ -1261,7 +1261,7 @@
             
             // 检查图片是否已加载
             if (!modalImg.classList.contains('loaded')) {
-                alert('图片正在加载中，请稍后再试');
+                alert('Image is loading, please try again later');
                 return;
             }
             
@@ -1273,7 +1273,7 @@
             downloadLink.href = imageUrl;
             
             // 设置下载文件名
-            const fileName = modalTitle.textContent || '图片下载_' + new Date().getTime() + '.png';
+            const fileName = modalTitle.textContent || 'image_download_' + new Date().getTime() + '.png';
             downloadLink.download = fileName;
             
             // 添加到文档中并触发点击
@@ -1351,9 +1351,9 @@
                     }
                 });
             } catch (error) {
-                console.error('初始化页面失败:', error);
+                console.error('Failed to initialize page:', error);
                 document.getElementById('fileList').innerHTML = 
-                    `<li>初始化失败: ${error.message}</li>`;
+                     `<li>Initialization failed: ${error.message}</li>`;
             }
         }
 
@@ -1378,7 +1378,7 @@
             const secretKey = document.getElementById('secretKey').value.trim();
             
             if (!secretId || !secretKey) {
-                showLoginStatus('请输入SecretId和SecretKey', true);
+                showLoginStatus('Please enter SecretId and SecretKey', true);
                 return;
             }
             
@@ -1388,7 +1388,7 @@
             
             // 尝试初始化COS
             initCOS().then(() => {
-                console.log('COS 初始化成功');
+                console.log('COS initialization successful');
                 
                 // 保存凭证到localStorage
                 localStorage.setItem('cosCredentials', JSON.stringify({
@@ -1416,8 +1416,8 @@
                 // 加载文件列表
                 updateFileList();
             }).catch(err => {
-                console.error('COS 初始化失败:', err);
-                showLoginStatus('COS 初始化失败: ' + err.message, true);
+                console.error('COS initialization failed:', err);
+                showLoginStatus('COS initialization failed: ' + err.message, true);
                 // 清空凭证
                 cosCredentials.secretId = '';
                 cosCredentials.secretKey = '';
@@ -1482,7 +1482,7 @@
                     
                     // 尝试初始化COS
                     return initCOS().then(() => {
-                        console.log('自动登录成功');
+                        console.log('Auto login successful');
                         
                         // 隐藏登录页面，显示主应用
                         document.getElementById('login-container').style.display = 'none';
@@ -1497,7 +1497,7 @@
                         
                         return true;
                     }).catch(err => {
-                        console.error('自动登录失败:', err);
+                        console.error('Auto login failed:', err);
                         // 清空凭证
                         cosCredentials.secretId = '';
                         cosCredentials.secretKey = '';
@@ -1508,7 +1508,7 @@
                 }
                 return Promise.resolve(false);
             } catch (error) {
-                console.error('尝试自动登录时出错:', error);
+                console.error('Error during auto login attempt:', error);
                 // 清除可能损坏的凭证
                 localStorage.removeItem('cosCredentials');
                 return Promise.resolve(false);
@@ -1529,7 +1529,7 @@
                 }
             }).catch(error => {
                 // 发生错误时也隐藏加载指示器并显示登录页面
-                console.error('初始化过程中出错:', error);
+                console.error('Error during initialization:', error);
                 document.getElementById('loading-container').style.display = 'none';
                 document.getElementById('login-container').style.display = 'block';
             });
