@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:chirpy.cotes.page)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh api *)",
+      "Bash(curl -s \"https://api.github.com/repos/cotes2020/chirpy-starter/git/trees/main?recursive=1\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(x['path']\\) for x in data.get\\('tree',[]\\)]\")",
+      "Bash(curl *)"
+    ]
+  }
+}

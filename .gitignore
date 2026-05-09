@@ -1,30 +1,27 @@
-# Jekyll 生成文件
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
-
-# Ruby 依赖
+# Bundler cache
+.bundle
+vendor
 Gemfile.lock
-vendor/
-.bundle/
 
-# 操作系统文件
-.DS_Store
-Thumbs.db
-desktop.ini
+# Jekyll cache
+.jekyll-cache
+.jekyll-metadata
+_site
 
-# 编辑器和 IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# RubyGems
+*.gem
 
-# 测试文件（可选 - 如果不想提交测试文件）
-test-*.html
+# NPM dependencies
+node_modules
+package-lock.json
 
-# 临时文件
-*.tmp
-*.bak
-.*.tmp
+# IDE configurations
+.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# Misc
+_sass/vendors
+assets/js/dist

@@ -2,7 +2,8 @@
 layout: post
 title: "用 GitHub Pages 搭建个人博客"
 date: 2026-05-08 15:30:00 +0800
-excerpt: "从零开始,用最简单的方式在 GitHub Pages 上搭建一个属于自己的博客站点。"
+categories: [教程, GitHub]
+tags: [github-pages, jekyll, tutorial]
 ---
 
 从零开始,用最简单的方式在 GitHub Pages 上搭建一个属于自己的博客站点。

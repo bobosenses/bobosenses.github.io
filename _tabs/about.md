@@ -1,7 +1,7 @@
 ---
-layout: page
-title: 关于
-permalink: /about.html
+# the default layout is 'page'
+icon: fas fa-info-circle
+order: 4
 ---
 
 ## 关于我
@@ -22,15 +22,14 @@ permalink: /about.html
 这个博客使用以下技术构建：
 
 - **Jekyll** - 静态站点生成器
+- **Chirpy** - 现代化 Jekyll 主题
 - **GitHub Pages** - 免费托管服务
 - **Markdown** - 内容编写
-- **SCSS** - 样式管理
 
 ## 联系方式
 
 如果你想和我交流，可以通过以下方式联系我：
 
 - GitHub: [@bobosenses](https://github.com/bobosenses)
-- Email: your-email@example.com
 
 感谢你的访问！

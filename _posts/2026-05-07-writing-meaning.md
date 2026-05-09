@@ -2,7 +2,8 @@
 layout: post
 title: "开始写作的意义"
 date: 2026-05-07 20:00:00 +0800
-excerpt: "写作不仅是输出,更是一种思考方式。把想法写下来,才能看清它们的脉络。"
+categories: [思考, 写作]
+tags: [writing, thinking, personal-growth]
 ---
 
 写作不仅是输出,更是一种思考方式。
