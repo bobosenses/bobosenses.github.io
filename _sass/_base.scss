@@ -1,0 +1,119 @@
+// ============================================================================
+// Base Styles and CSS Reset
+// ============================================================================
+// This file contains foundational styles including CSS reset, typography,
+// links, lists, code blocks, and images. These styles establish the baseline
+// for all pages in the Jekyll blog.
+//
+// Requirements: 9.1, 9.5, 6.2, 6.5
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// CSS Reset
+// ----------------------------------------------------------------------------
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// ----------------------------------------------------------------------------
+// Body
+// ----------------------------------------------------------------------------
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $color-text;
+  background: $color-background;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// ----------------------------------------------------------------------------
+// Typography
+// ----------------------------------------------------------------------------
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: $line-height-heading;
+  font-weight: 600;
+  margin-bottom: $spacing-sm;
+}
+
+h1 { 
+  font-size: $font-size-h1; 
+}
+
+h2 { 
+  font-size: $font-size-h2; 
+}
+
+h3 { 
+  font-size: $font-size-h3; 
+}
+
+p {
+  margin-bottom: $spacing-sm;
+}
+
+// ----------------------------------------------------------------------------
+// Links
+// ----------------------------------------------------------------------------
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-fast;
+  
+  &:hover {
+    color: $color-primary-dark;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Lists
+// ----------------------------------------------------------------------------
+
+ul, ol {
+  margin-left: $spacing-md;
+  margin-bottom: $spacing-sm;
+}
+
+// ----------------------------------------------------------------------------
+// Code
+// ----------------------------------------------------------------------------
+
+code {
+  font-family: $font-family-mono;
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: $border-radius-sm;
+}
+
+pre {
+  background: #282c34;
+  color: #abb2bf;
+  padding: $spacing-sm;
+  border-radius: $border-radius-md;
+  overflow-x: auto;
+  margin-bottom: $spacing-sm;
+  
+  code {
+    background: none;
+    padding: 0;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Images
+// ----------------------------------------------------------------------------
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}

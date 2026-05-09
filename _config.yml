@@ -1,0 +1,56 @@
+# Site Information
+title: "Bobo's Blog"
+description: "记录想法，分享生活"
+author: "Bobo"
+email: ""
+
+# GitHub Pages Configuration
+baseurl: ""
+url: "https://bobosenses.github.io"
+
+# Build Settings
+markdown: kramdown
+theme: null
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Kramdown Configuration
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+
+# Exclude Files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .gitignore
+  - .kiro
+
+# Pagination Settings (optional)
+paginate: 10
+paginate_path: "/page:num/"
+
+# Default Values
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      comments: false
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+
+# Permalink Format
+permalink: /:year/:month/:day/:title/
+
+# Timezone
+timezone: Asia/Shanghai

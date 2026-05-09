@@ -1,0 +1,21 @@
+---
+layout: default
+---
+
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+    <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}">
+      {{ page.date | date: "%Y年%m月%d日" }}
+    </time>
+  </header>
+  
+  <div class="post-content">
+    {{ content }}
+  </div>
+  
+  <footer class="post-footer">
+    <a href="/" class="back-link">← 返回首页</a>
+    <a href="/archive.html" class="archive-link">查看更多文章 →</a>
+  </footer>
+</article>

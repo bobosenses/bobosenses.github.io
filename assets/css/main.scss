@@ -1,0 +1,17 @@
+---
+---
+
+// ============================================================================
+// Main Stylesheet
+// ============================================================================
+// This file imports all SCSS modules to create the complete stylesheet.
+// The front matter (---) is required for Jekyll to process this file.
+//
+// Requirements: 9.1, 9.6
+// ============================================================================
+
+@import "variables";
+@import "base";
+@import "layout";
+@import "components";
+@import "syntax";
