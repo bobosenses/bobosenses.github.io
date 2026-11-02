@@ -1,0 +1,26 @@
+---
+layout: default
+---
+{% if page.archive_kind == "category" %}
+  {% assign posts = site.categories[page.archive_name] %}
+  {% assign index_url = "/categories/" %}
+  {% assign index_label = "分类" %}
+{% else %}
+  {% assign posts = site.tags[page.archive_name] %}
+  {% assign index_url = "/tags/" %}
+  {% assign index_label = "标签" %}
+{% endif %}
+<header class="page-head">
+  <p class="page-kicker"><a href="{{ index_url | relative_url }}">{{ index_label }}</a></p>
+  <h1>{{ page.archive_name | escape }}</h1>
+  <p class="page-dek">{{ posts.size }} 篇</p>
+</header>
+{% if posts.size == 0 %}
+  <p class="empty">这里还没有文章。</p>
+{% else %}
+  <ol class="ledger">
+    {% for post in posts %}
+      {% include ledger_item.html post=post %}
+    {% endfor %}
+  </ol>
+{% endif %}

@@ -1,0 +1,113 @@
+---
+layout: default
+---
+{% assign oldest = site.posts | last %}
+{% assign shown_slugs = "|" %}
+{% assign featured_count = 0 %}
+
+<section class="hero">
+  <p class="hero-kicker">{{ site.title | escape }}</p>
+  <h1 class="hero-name">{{ site.profile.name | default: site.author | escape }}<span class="seal" aria-hidden="true"></span></h1>
+  {% assign role = site.profile.role | strip %}
+  {% assign location = site.profile.location | strip %}
+  {% if role != "" and role %}
+    <p class="hero-role">{{ role | escape }}{% if location != "" and location %} · {{ location | escape }}{% endif %}</p>
+  {% elsif location != "" and location %}
+    <p class="hero-role">{{ location | escape }}</p>
+  {% endif %}
+  <p class="hero-lead">{{ site.tagline | escape }}</p>
+  <p class="hero-copy">{{ site.description | escape }}</p>
+  <div class="hero-actions">
+    <a class="button" href="{{ '/archives/' | relative_url }}">阅读文章</a>
+    <a class="button button-ghost" href="https://github.com/{{ site.profile.github }}" rel="me noopener noreferrer">GitHub</a>
+  </div>
+  {% if site.posts.size > 0 %}
+    <p class="hero-meta">
+      <span>{{ site.posts.size }} 篇文章</span>
+      <span>{{ site.categories.size }} 个分类</span>
+      {% if oldest %}<span>自 {{ oldest.date | date: "%Y.%m" }} 起</span>{% endif %}
+    </p>
+  {% endif %}
+</section>
+
+{% if site.posts.size == 0 %}
+  <p class="empty">还没有文章。在 <code>_posts</code> 里加一篇 Markdown，构建后就会出现在这里。</p>
+{% else %}
+  <section class="section" aria-labelledby="featured-heading">
+    <div class="section-head">
+      <h2 id="featured-heading">精选</h2>
+      <a href="{{ '/archives/' | relative_url }}">全部文章</a>
+    </div>
+    <div class="feature-grid">
+      {% for slug in site.featured_posts %}
+        {% assign match = site.posts | where: "slug", slug | first %}
+        {% if match %}
+          {% assign featured_count = featured_count | plus: 1 %}
+          {% assign shown_slugs = shown_slugs | append: slug | append: "|" %}
+          {% include feature_card.html post=match %}
+        {% endif %}
+      {% endfor %}
+      {% if featured_count == 0 %}
+        {% for post in site.posts limit: 2 %}
+          {% assign shown_slugs = shown_slugs | append: post.slug | append: "|" %}
+          {% include feature_card.html post=post %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </section>
+
+  {% capture recent_html %}
+    {% assign recent_count = 0 %}
+    {% for post in site.posts %}
+      {% assign needle = "|" | append: post.slug | append: "|" %}
+      {% unless shown_slugs contains needle %}
+        {% if recent_count < 6 %}
+          {% include ledger_item.html post=post %}
+          {% assign recent_count = recent_count | plus: 1 %}
+        {% endif %}
+      {% endunless %}
+    {% endfor %}
+  {% endcapture %}
+  {% if recent_count > 0 %}
+    <section class="section" aria-labelledby="recent-heading">
+      <div class="section-head">
+        <h2 id="recent-heading">最近</h2>
+        <a href="{{ '/archives/' | relative_url }}">归档</a>
+      </div>
+      <ol class="ledger">
+        {{ recent_html }}
+      </ol>
+    </section>
+  {% endif %}
+{% endif %}
+
+{% if site.categories.size > 0 %}
+  <section class="section" aria-labelledby="topics-heading">
+    <div class="section-head">
+      <h2 id="topics-heading">分类</h2>
+      <a href="{{ '/categories/' | relative_url }}">全部分类</a>
+    </div>
+    <ul class="topic-grid">
+      {% assign cats = site.categories | sort %}
+      {% for cat in cats %}
+        {% assign name = cat[0] %}
+        {% assign posts = cat[1] %}
+        <li>
+          {% capture term_slug %}{{ name | archive_slug | url_encode }}{% endcapture %}
+          <a href="{{ '/categories/' | append: term_slug | append: '/' | relative_url }}">
+            <span>{{ name | escape }}</span>
+            <span>{{ posts.size }} 篇</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+<section class="section about-teaser" aria-labelledby="about-heading">
+  <div class="section-head">
+    <h2 id="about-heading">关于</h2>
+  </div>
+  <p>{{ site.profile.intro | escape }}</p>
+  <a class="text-link" href="{{ '/about/' | relative_url }}">关于这个站点</a>
+</section>

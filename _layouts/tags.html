@@ -1,0 +1,25 @@
+---
+layout: default
+---
+<header class="page-head">
+  <h1>{{ page.title | escape }}</h1>
+  <p class="page-dek">标签写在文章开头的 tags 字段里。</p>
+</header>
+{% if site.tags.size == 0 %}
+  <p class="empty">还没有标签。</p>
+{% else %}
+  <ul class="tag-list">
+    {% assign tags = site.tags | sort %}
+    {% for tag in tags %}
+      {% assign name = tag[0] %}
+      {% assign posts = tag[1] %}
+      <li>
+        {% capture term_slug %}{{ name | archive_slug | url_encode }}{% endcapture %}
+        <a href="{{ '/tags/' | append: term_slug | append: '/' | relative_url }}">
+          {{ name | escape }}
+          <span>{{ posts.size }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

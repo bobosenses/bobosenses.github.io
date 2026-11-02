@@ -1,60 +1,50 @@
 # Bobo's Blog
 
-个人博客，使用 Jekyll + Chirpy 主题构建，托管在 GitHub Pages。
+Bobo 的个人站点。用 Jekyll 生成静态页面，由 GitHub Actions 部署到 GitHub Pages。
 
-## 特性
+首页是个人介绍和精选文章，不是主题自带的博客列表。文章仍放在 `_posts`，地址保持 `/posts/文章-slug/`。
 
-- 🌓 深色/浅色模式切换
-- 🔍 全站搜索功能
-- 📑 文章目录（TOC）
-- 🏷️ 标签和分类系统
-- 📱 完全响应式设计
-- ⚡ 快速加载和 PWA 支持
+## 本地预览
 
-## 技术栈
-
-- **Jekyll** - 静态站点生成器
-- **Chirpy** - 现代化 Jekyll 主题
-- **GitHub Pages** - 免费托管
-- **GitHub Actions** - 自动部署
-
-## 本地开发
-
-如果需要本地预览（可选）：
+需要 Ruby 3.2 或更新版本。
 
 ```bash
-# 安装依赖
 bundle install
-
-# 启动本地服务器
 bundle exec jekyll serve
-
-# 访问 http://localhost:4000
 ```
 
-## 添加新文章
+浏览器打开 http://127.0.0.1:4000 。
 
-在 `_posts` 目录创建新文件，格式：`YYYY-MM-DD-title.md`
+生产构建和链接检查：
 
-```markdown
----
-layout: post
-title: "文章标题"
-date: YYYY-MM-DD HH:MM:SS +0800
-categories: [分类1, 分类2]
-tags: [标签1, 标签2]
----
-
-文章内容...
+```bash
+bash tools/test.sh
 ```
 
-## 部署
+## 发布后建议改的配置
 
-推送到 GitHub 后，GitHub Actions 会自动构建和部署。
+都在 `_config.yml`：
 
-## 访问
+| 字段 | 作用 |
+| --- | --- |
+| `title` / `tagline` / `description` | 站点标题、首页导语、搜索引擎描述 |
+| `profile.name` | 页头和首页上的名字 |
+| `profile.intro` | 首页「关于」那段短句 |
+| `profile.github` | GitHub 用户名。改它时请同时改 `social.links` |
+| `profile.email` / `profile.role` / `profile.location` | 选填。留空则不显示 |
+| `featured_posts` | 首页精选。填写 `_posts` 文件名中日期后面的 slug |
+| `default_theme` | `system`、`light` 或 `dark` |
+| `url` | 站点完整地址，不要以 `/` 结尾 |
 
-https://bobosenses.github.io/
+关于页正文在 `_tabs/about.md`。新文章放在 `_posts`，文件名用 `YYYY-MM-DD-slug.md`。
+
+## 页面
+
+- `/` 首页
+- `/archives/` 全部文章
+- `/categories/` 与 `/tags/` 分类和标签
+- `/about/` 关于
+- `/feed.xml` 订阅
 
 ## 许可
 

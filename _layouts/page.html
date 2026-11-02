@@ -1,0 +1,22 @@
+---
+layout: default
+---
+<article class="page">
+  <header class="page-head">
+    <h1>{{ page.title | escape }}</h1>
+    {% if page.url == "/about/" %}
+      {% assign role = site.profile.role | strip %}
+      {% assign location = site.profile.location | strip %}
+      {% if role != "" and role or location != "" and location %}
+        <p class="page-dek">
+          {% if role != "" and role %}{{ role | escape }}{% endif %}
+          {% if role != "" and role and location != "" and location %} · {% endif %}
+          {% if location != "" and location %}{{ location | escape }}{% endif %}
+        </p>
+      {% endif %}
+    {% endif %}
+  </header>
+  <div class="prose">
+    {{ content }}
+  </div>
+</article>

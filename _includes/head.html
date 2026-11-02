@@ -1,0 +1,35 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem("theme");
+    var fallback = document.documentElement.getAttribute("data-default-theme") || "system";
+    var choice = saved || fallback;
+    if (choice === "light" || choice === "dark") {
+      document.documentElement.setAttribute("data-theme", choice);
+    }
+  } catch (err) {}
+})();
+</script>
+<link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+{% seo %}
+{% feed_meta %}
+<script>
+(function () {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (reg) { reg.unregister(); });
+    });
+  }
+  if (window.caches && caches.keys) {
+    caches.keys().then(function (keys) {
+      keys.forEach(function (key) { caches.delete(key); });
+    });
+  }
+})();
+</script>

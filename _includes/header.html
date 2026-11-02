@@ -1,0 +1,61 @@
+{% assign url = page.url | default: "/" %}
+{% assign is_home = false %}
+{% if url == "/" or url == "/index.html" %}
+  {% assign is_home = true %}
+{% endif %}
+{% assign is_posts = false %}
+{% if url == "/archives/" or url contains "/posts/" %}
+  {% assign is_posts = true %}
+{% endif %}
+{% assign is_categories = false %}
+{% if url contains "/categories/" %}
+  {% assign is_categories = true %}
+{% endif %}
+{% assign is_tags = false %}
+{% if url contains "/tags/" %}
+  {% assign is_tags = true %}
+{% endif %}
+{% assign is_about = false %}
+{% if url == "/about/" or url == "/about/index.html" %}
+  {% assign is_about = true %}
+{% endif %}
+<header class="site-header">
+  <div class="wrap header-bar">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="29" height="29" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+        <rect class="mark-core" x="11" y="11" width="10" height="10"></rect>
+      </svg>
+      <span class="brand-name">{{ site.profile.name | default: site.author | escape }}</span>
+    </a>
+    <nav id="site-nav" class="site-nav" data-nav aria-label="站点">
+      <a href="{{ '/' | relative_url }}" {% if is_home %}aria-current="page"{% endif %}>首页</a>
+      <a href="{{ '/archives/' | relative_url }}" {% if is_posts %}aria-current="page"{% endif %}>文章</a>
+      <a href="{{ '/categories/' | relative_url }}" {% if is_categories %}aria-current="page"{% endif %}>分类</a>
+      <a href="{{ '/tags/' | relative_url }}" {% if is_tags %}aria-current="page"{% endif %}>标签</a>
+      <a href="{{ '/about/' | relative_url }}" {% if is_about %}aria-current="page"{% endif %}>关于</a>
+    </nav>
+    <div class="header-tools">
+      <form class="search" data-search role="search" action="{{ '/archives/' | relative_url }}">
+        <label class="sr-only" for="site-search">搜索文章</label>
+        <input id="site-search" data-search-input type="search" name="q" placeholder="搜索" autocomplete="off" enterkeyhint="search" data-search-index="{{ '/assets/search.json' | relative_url }}">
+        <div class="search-panel" data-search-panel hidden></div>
+      </form>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="切换颜色模式">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.6" d="M15.5 3.5a8 8 0 1 0 5 12.5A8.5 8.5 0 0 1 15.5 3.5z"></path>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+          <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18"></path>
+        </svg>
+      </button>
+      <button class="icon-button menu-button" type="button" data-menu-button aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">菜单</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
