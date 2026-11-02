@@ -1,28 +1,16 @@
 {
-  "name": "Jekyll",
-  "image": "mcr.microsoft.com/devcontainers/jekyll:2-bullseye",
-  "onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "name": "yichuan · Astro",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "postCreateCommand": "npm ci",
+  "forwardPorts": [
+    4321
+  ],
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh"
-      },
       "extensions": [
-        // Liquid tags auto-complete
-        "killalau.vscode-liquid-snippets",
-        // Liquid syntax highlighting and formatting
-        "Shopify.theme-check-vscode",
-        // Shell
-        "timonwong.shellcheck",
-        "mkhl.shfmt",
-        // Common formatter
-        "EditorConfig.EditorConfig",
+        "astro-build.astro-vscode",
         "esbenp.prettier-vscode",
-        "stylelint.vscode-stylelint",
-        "yzhang.markdown-all-in-one",
-        // Git
-        "mhutchie.git-graph"
+        "yzhang.markdown-all-in-one"
       ]
     }
   }

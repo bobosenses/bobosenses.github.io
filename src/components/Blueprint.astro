@@ -1,0 +1,28 @@
+---
+import { site } from '../site.config';
+---
+<div class="blueprint" aria-hidden="true" data-blueprint>
+  <span class="dimension dimension-top"><i></i>768<i></i></span>
+  <svg class="blueprint-art" viewBox="0 0 768 300" fill="none">
+    <defs>
+      <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><path d="M0 0v8" stroke="currentColor" stroke-opacity=".18" /></pattern>
+    </defs>
+    <g class="blueprint-guides" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="4 5"><path d="M40 30 728 300M40 300 728 30M384 0v300"/></g>
+    <g class="blueprint-object" stroke="currentColor" stroke-linejoin="round">
+      <path d="m267 112 132-76 153 88-132 76-153-88Z" fill="url(#hatch)"/>
+      <path d="m267 112 0 46 153 88 132-76v-46l-132 76-153-88Z" fill="var(--bg)"/>
+      <path d="m420 200 0 46M267 112l153 88 132-76"/>
+      <path d="m329 112 70-40 91 52-70 40-91-52Z" fill="var(--bg)"/>
+      <path d="m329 112 70 40 70-40M399 152v-80" stroke-opacity=".5"/>
+      <path d="m209 188 47-27 59 34-47 27-59-34Z" fill="url(#hatch)"/>
+      <path d="M209 188v33l59 34 47-27v-33l-47 27-59-34ZM268 222v33" fill="var(--bg)"/>
+      <path d="m465 43 32-18 62 36-32 18-62-36Z" fill="url(#hatch)"/>
+      <path d="M465 43v26l62 36 32-18V61l-32 18-62-36ZM527 79v26" fill="var(--bg)"/>
+    </g>
+    <g stroke="currentColor" stroke-opacity=".35"><path d="M565 36h42m-24 0v51m-4-45 4-6 4 6m-8 39 4 6 4-6"/></g>
+    <text x="596" y="67" fill="currentColor" opacity=".45" font-family="monospace" font-size="10">30°</text>
+    <text x="548" y="239" fill="currentColor" opacity=".35" font-family="monospace" font-size="10">IDEAS → CODE → NOTES</text>
+  </svg>
+  <span class="blueprint-note">a little space for curiosity <span>↙</span></span>
+  <span class="blueprint-caption">{site.name.toUpperCase()} / PERSONAL SPACE</span>
+</div>

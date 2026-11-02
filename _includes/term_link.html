@@ -1,2 +1,0 @@
-{%- capture term_slug -%}{{ include.name | archive_slug | url_encode }}{%- endcapture -%}
-<a href="{{ '/' | append: include.kind | append: '/' | append: term_slug | append: '/' | relative_url }}">{{ include.name | escape }}</a>

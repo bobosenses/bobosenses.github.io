@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import PostList from './PostList.astro';
+import { getPosts } from '../lib/posts';
+interface Props { kind: 'categories' | 'tags'; name: string }
+const { kind, name } = Astro.props;
+const posts = (await getPosts()).filter(post => post.data[kind].includes(name));
+---
+<Base title={name}><header class="page-heading"><a class="eyebrow" href={`/${kind}/`}>← 全部{kind === 'tags' ? '标签' : '分类'}</a><h1>{name}</h1><p>这里有 {posts.length} 篇记录。</p></header><PostList posts={posts}/></Base>
