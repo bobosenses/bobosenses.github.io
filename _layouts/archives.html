@@ -1,0 +1,22 @@
+---
+layout: default
+---
+<header class="page-head">
+  <h1>{{ page.title | escape }}</h1>
+  <p class="page-dek">按时间排列，共 {{ site.posts.size }} 篇。</p>
+</header>
+{% if site.posts.size == 0 %}
+  <p class="empty">还没有文章。</p>
+{% else %}
+  {% assign years = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
+  {% for year in years %}
+    <section class="year-group" aria-labelledby="year-{{ year.name }}">
+      <h2 class="year-label" id="year-{{ year.name }}">{{ year.name }}</h2>
+      <ol class="ledger">
+        {% for post in year.items %}
+          {% include ledger_item.html post=post %}
+        {% endfor %}
+      </ol>
+    </section>
+  {% endfor %}
+{% endif %}
