@@ -42,12 +42,14 @@
     menuButton.addEventListener("click", function () {
       var open = nav.classList.toggle("is-open");
       menuButton.setAttribute("aria-expanded", open ? "true" : "false");
+      document.body.classList.toggle("nav-open", open);
     });
 
     nav.addEventListener("click", function (event) {
       if (event.target.closest("a")) {
         nav.classList.remove("is-open");
         menuButton.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("nav-open");
       }
     });
   }
@@ -56,6 +58,7 @@
     if (event.key !== "Escape") return;
     if (nav && nav.classList.contains("is-open")) {
       nav.classList.remove("is-open");
+      document.body.classList.remove("nav-open");
       if (menuButton) menuButton.setAttribute("aria-expanded", "false");
     }
     if (searchPanel && !searchPanel.hidden) {

@@ -22,11 +22,11 @@
 <header class="site-header">
   <div class="wrap header-bar">
     <a class="brand" href="{{ '/' | relative_url }}">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="1.5" y="1.5" width="29" height="29" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
-        <rect class="mark-core" x="11" y="11" width="10" height="10"></rect>
-      </svg>
-      <span class="brand-name">{{ site.profile.name | default: site.author | escape }}</span>
+      <span class="brand-chop" aria-hidden="true"></span>
+      <span class="brand-lockup">
+        <span class="brand-name">{{ site.profile.name | default: site.author | escape }}</span>
+        <span class="brand-handle">@{{ site.profile.github | escape }}</span>
+      </span>
     </a>
     <nav id="site-nav" class="site-nav" data-nav aria-label="站点">
       <a href="{{ '/' | relative_url }}" {% if is_home %}aria-current="page"{% endif %}>首页</a>

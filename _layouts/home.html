@@ -4,29 +4,37 @@ layout: default
 {% assign oldest = site.posts | last %}
 {% assign shown_slugs = "|" %}
 {% assign featured_count = 0 %}
+{% assign person = site.profile.name | default: site.author %}
 
 <section class="hero">
-  <p class="hero-kicker">{{ site.title | escape }}</p>
-  <h1 class="hero-name">{{ site.profile.name | default: site.author | escape }}<span class="seal" aria-hidden="true"></span></h1>
-  {% assign role = site.profile.role | strip %}
-  {% assign location = site.profile.location | strip %}
-  {% if role != "" and role %}
-    <p class="hero-role">{{ role | escape }}{% if location != "" and location %} · {{ location | escape }}{% endif %}</p>
-  {% elsif location != "" and location %}
-    <p class="hero-role">{{ location | escape }}</p>
-  {% endif %}
-  <p class="hero-lead">{{ site.tagline | escape }}</p>
-  <p class="hero-copy">{{ site.description | escape }}</p>
-  <div class="hero-actions">
-    <a class="button" href="{{ '/archives/' | relative_url }}">阅读文章</a>
-    <a class="button button-ghost" href="https://github.com/{{ site.profile.github }}" rel="me noopener noreferrer">GitHub</a>
+  <p class="hero-poster" aria-hidden="true">{{ site.tagline | escape }}</p>
+  <div class="hero-main">
+    <p class="hero-kicker">
+      <span>{{ site.title | escape }}</span>
+      <span class="kicker-mark" aria-hidden="true"></span>
+      <span class="kicker-handle">@{{ site.profile.github | escape }}</span>
+    </p>
+    <h1 class="hero-name">{{ person | escape }}</h1>
+    {% assign role = site.profile.role | strip %}
+    {% assign location = site.profile.location | strip %}
+    {% if role != "" and role %}
+      <p class="hero-role">{{ role | escape }}{% if location != "" and location %} · {{ location | escape }}{% endif %}</p>
+    {% elsif location != "" and location %}
+      <p class="hero-role">{{ location | escape }}</p>
+    {% endif %}
+    <p class="hero-lead">{{ site.tagline | escape }}</p>
+    <p class="hero-copy">{{ site.description | escape }}</p>
+    <div class="hero-actions">
+      <a class="text-action" href="{{ '/archives/' | relative_url }}">阅读文章<span aria-hidden="true">→</span></a>
+      <a class="text-action text-action-quiet" href="https://github.com/{{ site.profile.github }}" rel="me noopener noreferrer">GitHub<span aria-hidden="true">↗</span></a>
+    </div>
   </div>
   {% if site.posts.size > 0 %}
-    <p class="hero-meta">
-      <span>{{ site.posts.size }} 篇文章</span>
-      <span>{{ site.categories.size }} 个分类</span>
-      {% if oldest %}<span>自 {{ oldest.date | date: "%Y.%m" }} 起</span>{% endif %}
-    </p>
+    <aside class="hero-colophon" aria-label="站点摘要">
+      <p><strong>{{ site.posts.size }}</strong><span>篇文章</span></p>
+      <p><strong>{{ site.categories.size }}</strong><span>个分类</span></p>
+      {% if oldest %}<p><strong>{{ oldest.date | date: "%Y" }}</strong><span>开始记录</span></p>{% endif %}
+    </aside>
   {% endif %}
 </section>
 
@@ -96,7 +104,7 @@ layout: default
           {% capture term_slug %}{{ name | archive_slug | url_encode }}{% endcapture %}
           <a href="{{ '/categories/' | append: term_slug | append: '/' | relative_url }}">
             <span>{{ name | escape }}</span>
-            <span>{{ posts.size }} 篇</span>
+            <span>{{ posts.size }}</span>
           </a>
         </li>
       {% endfor %}
@@ -108,6 +116,8 @@ layout: default
   <div class="section-head">
     <h2 id="about-heading">关于</h2>
   </div>
-  <p>{{ site.profile.intro | escape }}</p>
-  <a class="text-link" href="{{ '/about/' | relative_url }}">关于这个站点</a>
+  <blockquote>
+    <p>{{ site.profile.intro | escape }}</p>
+  </blockquote>
+  <a class="text-action" href="{{ '/about/' | relative_url }}">关于这个站点<span aria-hidden="true">→</span></a>
 </section>
