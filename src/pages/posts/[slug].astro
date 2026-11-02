@@ -1,0 +1,22 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { getPosts, postUrl, formatDate, termUrl, summary } from '../../lib/posts';
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, index) => ({ params: { slug: post.id }, props: { post, newer: posts[index - 1], older: posts[index + 1] } }));
+}
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const minutes = Math.max(1, Math.ceil((post.body || '').replace(/\s/g, '').length / 450));
+---
+<Base title={post.data.title} description={summary(post)} article date={post.data.date}>
+  <article>
+    <header class="page-heading article-heading"><a class="eyebrow" href="/archives/">← 所有文章</a><div class="article-meta"><time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time><span>·</span><span>{minutes} 分钟阅读</span></div><h1>{post.data.title}</h1><p>{post.data.excerpt}</p><div class="article-tags">{post.data.tags.map(tag => <a href={termUrl('tags', tag)}>#{tag}</a>)}</div></header>
+    {headings.length > 1 && <details class="article-toc"><summary><Icon name="layers" size={16}/>文章目录<span aria-hidden="true">+</span></summary><ol>{headings.filter(h => h.depth <= 3).map(h => <li class:list={{ 'toc-sub': h.depth === 3 }}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol></details>}
+    <div class="prose"><Content /></div>
+    <div class="article-end"><span>写于 {formatDate(post.data.date)}</span><button data-copy-link type="button"><Icon name="copy" size={15}/>复制文章链接</button></div>
+    <nav class="article-pager" aria-label="相邻文章">{newer ? <a href={postUrl(newer)}><small>← 较新一篇</small><strong>{newer.data.title}</strong></a> : <span/>}{older && <a href={postUrl(older)}><small>较早一篇 →</small><strong>{older.data.title}</strong></a>}</nav>
+  </article>
+</Base>

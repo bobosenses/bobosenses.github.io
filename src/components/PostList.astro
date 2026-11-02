@@ -1,0 +1,16 @@
+---
+import { postUrl, formatDate, type Post } from '../lib/posts';
+import Icon from './Icon.astro';
+interface Props { posts: Post[] }
+const { posts } = Astro.props;
+---
+<ol class="post-list">
+  {posts.map((post, index) => <li>
+    <a class="post-row" href={postUrl(post)}>
+      <span class="row-index">{String(index + 1).padStart(2, '0')}</span>
+      <span class="row-title">{post.data.title}</span>
+      <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      <Icon name="arrow" size={16} />
+    </a>
+  </li>)}
+</ol>

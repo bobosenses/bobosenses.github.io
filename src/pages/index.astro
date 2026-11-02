@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Blueprint from '../components/Blueprint.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import PostCard from '../components/PostCard.astro';
+import PostList from '../components/PostList.astro';
+import Icon from '../components/Icon.astro';
+import { getPosts, getTerms, termUrl } from '../lib/posts';
+import { site } from '../site.config';
+const posts = await getPosts();
+const configured = site.featured.map(id => posts.find(p => p.id === id)).filter((p): p is (typeof posts)[number] => Boolean(p));
+const featured = configured.length ? configured : posts.slice(0, 2);
+const categories = getTerms(posts, 'categories');
+const tags = getTerms(posts, 'tags');
+---
+<Base>
+  <section class="profile-section" aria-labelledby="profile-name">
+    <Blueprint />
+    <div class="profile-card">
+      <div class="avatar-cell"><img class="avatar" src={site.avatar} alt="Bobo 的 GitHub 头像" width="160" height="160" fetchpriority="high"/><span class="avatar-coordinate" aria-hidden="true">Ø 160</span></div>
+      <div class="profile-title"><div class="profile-handle">PERSONAL SPACE / @{site.handle}</div><h1 id="profile-name">{site.name}<span class="name-spark" aria-hidden="true">✳</span></h1><p>{site.tagline}</p></div>
+    </div>
+  </section>
+  <div class="stripe-divider" aria-hidden="true"></div>
+  <section class="overview" aria-label="个人概览">
+    <div class="overview-details"><p><span class="detail-icon"><Icon name="code" size={16}/></span>{site.role || '技术探索 · 学习笔记 · 生活感悟'}</p><p><span class="detail-icon"><Icon name={site.location ? 'pin' : 'globe'} size={16}/></span>{site.location || '在这里，保持好奇，持续记录。'}</p>{site.email && <p><span class="detail-icon"><Icon name="mail" size={16}/></span><a href={`mailto:${site.email}`}>{site.email}</a></p>}</div>
+    <a class="overview-note" href="/archives/"><span class="status-dot"></span>持续更新中<small>{posts.length} 篇文章，{categories.length} 个话题 <Icon name="right" size={14}/></small></a>
+  </section>
+  <div class="social-links"><a href={`https://github.com/${site.handle}`} target="_blank" rel="me noopener noreferrer"><Icon name="github" size={19}/><span>GitHub</span><Icon name="arrow" size={14}/></a><a href="/feed.xml"><Icon name="rss" size={19}/><span>RSS 订阅</span><Icon name="arrow" size={14}/></a><a href="/about/"><Icon name="book" size={19}/><span>关于我</span><Icon name="right" size={14}/></a></div>
+  <section class="home-section" aria-labelledby="about">
+    <SectionHeading id="about" title="关于" en="ABOUT"/>
+    <div class="about-body"><span class="hello-tag">Hello, world<span aria-hidden="true">_</span></span><p>{site.intro}</p><p>把遇到的问题、试过的方法、读过的知识写下来。<br class="desktop-break"/>希望这些记录，也能成为你下一次探索的起点。</p><a class="inline-link" href="/about/">更多关于我 <Icon name="arrow" size={14}/></a></div>
+    <div class="stats-grid"><a href="/archives/"><span>ARTICLES</span><strong>{String(posts.length).padStart(2, '0')}<small>篇文章</small></strong></a><a href="/categories/"><span>TOPICS</span><strong>{String(categories.length).padStart(2, '0')}<small>个话题</small></strong></a><a href="/tags/"><span>CONNECTIONS</span><strong>{String(tags.length).padStart(2, '0')}<small>个标签</small></strong></a></div>
+  </section>
+  {featured.length > 0 && <section class="home-section" aria-labelledby="featured"><SectionHeading id="featured" title="精选文章" en="ALL POSTS" count={featured.length} href="/archives/"/><div class="feature-grid">{featured.map((post, index) => <PostCard post={post} index={index}/>)}</div></section>}
+  <section class="home-section" aria-labelledby="writing"><SectionHeading id="writing" title="最近写作" en="WRITING" count={posts.length}/>{posts.length ? <PostList posts={posts.slice(0, 5)}/> : <p class="empty-state">第一篇记录，即将开始。</p>}<a class="section-bottom-link" href="/archives/">查看全部文章 <Icon name="right" size={16}/></a></section>
+  {categories.length > 0 && <section class="home-section" aria-labelledby="topics"><SectionHeading id="topics" title="探索的话题" en="TOPICS"/><ul class="topic-grid">{categories.map(([name, count], index) => <li><a href={termUrl('categories', name)}><span class="topic-index">{String(index + 1).padStart(2, '0')}</span><span>{name}</span><span class="topic-count">{count}<Icon name="arrow" size={14}/></span></a></li>)}</ul></section>}
+  <div class="closing-note"><span aria-hidden="true">✳</span><p>Stay curious. Keep building.</p><small>感谢你路过我的数字花园。</small></div>
+</Base>

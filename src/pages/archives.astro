@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { getPosts } from '../lib/posts';
+const posts = await getPosts();
+const years = [...new Set(posts.map(post => post.data.date.getFullYear()))];
+---
+<Base title="文章归档"><header class="page-heading"><a class="eyebrow" href="/">← BOBO / WRITING</a><h1>所有文章<span class="heading-count">({posts.length})</span></h1><p>一些探索，一些思考，一点点积累。</p></header>{years.map(year => <section class="archive-year"><h2>{year}<span>{posts.filter(p => p.data.date.getFullYear() === year).length} 篇</span></h2><PostList posts={posts.filter(p => p.data.date.getFullYear() === year)}/></section>)}{!posts.length && <p class="empty-state">还没有文章。</p>}</Base>

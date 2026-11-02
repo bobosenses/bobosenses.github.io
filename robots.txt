@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bobosenses.github.io/sitemap.xml

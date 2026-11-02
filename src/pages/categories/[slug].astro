@@ -1,0 +1,9 @@
+---
+import { getPosts, getTerms, termSlug } from '../../lib/posts';
+import TermArchive from '../../components/TermArchive.astro';
+export async function getStaticPaths() {
+  return getTerms(await getPosts(), 'categories').map(([name]) => ({ params: { slug: termSlug(name) }, props: { name } }));
+}
+const { name } = Astro.props;
+---
+<TermArchive kind="categories" name={name}/>

@@ -1,0 +1,8 @@
+---
+interface Props { id: string; title: string; en: string; count?: number; href?: string }
+const { id, title, en, count, href } = Astro.props;
+---
+<div class="section-heading">
+  <h2 id={id}><a href={`#${id}`} class="section-anchor" aria-label={`定位到${title}`}>#</a>{title}{count !== undefined && <sup>({count})</sup>}</h2>
+  {href ? <a class="section-more" href={href}>{en}<span aria-hidden="true"> ↗</span></a> : <span class="section-en">{en}</span>}
+</div>

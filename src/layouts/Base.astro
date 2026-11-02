@@ -1,0 +1,75 @@
+---
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../styles/global.css';
+import { site } from '../site.config';
+import { getPosts, summary, postUrl, formatDate, plainText } from '../lib/posts';
+import Icon from '../components/Icon.astro';
+interface Props { title?: string; description?: string; article?: boolean; date?: Date }
+const { title, description = site.description, article = false, date } = Astro.props;
+const pageTitle = title ? `${title} · ${site.title}` : `${site.name} — ${site.tagline}`;
+const path = Astro.url.pathname;
+const posts = await getPosts();
+const searchDocs = posts.map(post => ({ title: post.data.title, url: postUrl(post), date: formatDate(post.data.date), text: `${summary(post)} ${post.data.categories.join(' ')} ${post.data.tags.join(' ')} ${plainText(post.body || '')}` }));
+const nav = [{ href: '/archives/', label: '文章' }, { href: '/categories/', label: '分类' }, { href: '/tags/', label: '标签' }, { href: '/about/', label: '关于' }];
+const canonical = new URL(path, site.url);
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/feed.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(site.avatar, site.url)} />
+    {date && <meta property="article:published_time" content={date.toISOString()} />}
+    <script is:inline>
+      (() => {
+        let theme;
+        try { theme = localStorage.getItem('theme'); } catch {}
+        const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+    <header class="site-header">
+      <div class="header-inner frame">
+        <a href="/" class="brand" aria-label="Bobo 首页"><svg viewBox="0 0 32 32" width="30" height="30" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 3h13l8 7v7l-4 3 4 3v6H5V3Zm6 6v8h7l3-3v-2l-3-3h-7Zm0 13v3h10v-1l-3-2h-7Z"/></svg></a>
+        <nav class="site-nav" id="site-nav" aria-label="主导航">
+          {nav.map(item => <a href={item.href} aria-current={path.startsWith(item.href) || (item.href === '/archives/' && path.startsWith('/posts/')) ? 'page' : undefined}>{item.label}</a>)}
+        </nav>
+        <div class="header-actions">
+          <button class="search-trigger" type="button" data-search-open aria-label="搜索文章"><Icon name="search" size={17}/><kbd>⌘ K</kbd></button>
+          <a class="header-github" href={`https://github.com/${site.handle}`} target="_blank" rel="me noopener noreferrer" aria-label="在 GitHub 上找到 Bobo"><Icon name="github" size={18}/><span>GitHub</span></a>
+          <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="切换颜色模式"><Icon name="sun" class="sun-icon"/><Icon name="moon" class="moon-icon"/></button>
+          <button class="icon-button menu-toggle" type="button" data-menu-toggle aria-label="打开导航菜单" aria-controls="site-nav" aria-expanded="false"><Icon name="menu"/></button>
+        </div>
+      </div>
+    </header>
+    <main class="frame main-frame" id="content"><slot /></main>
+    <footer class="site-footer frame">
+      <div class="footer-signature"><a class="footer-name" href="/">{site.handle}<span class="status-dot"></span></a><p>记录每一次探索，让想法慢慢生长。</p></div>
+      <div class="footer-meta"><span>CRAFTED BY <a href={`https://github.com/${site.handle}`} target="_blank" rel="noopener noreferrer">@{site.handle}</a></span><span>BUILT WITH <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a></span><span>DESIGN INSPIRED BY <a href="https://chanhdai.com/" target="_blank" rel="noopener noreferrer">Chánh Đại ↗</a></span></div>
+      <div class="footer-bottom"><span>© {new Date().getFullYear()} {site.name}</span><div><a href="/feed.xml">RSS</a><a href={`https://github.com/${site.handle}/${site.handle}.github.io`} target="_blank" rel="noopener noreferrer">源代码 ↗</a><button data-back-top type="button">回到顶部 ↑</button></div></div>
+    </footer>
+    <dialog class="search-dialog" aria-labelledby="search-title" data-search-dialog>
+      <form method="dialog" class="search-dialog-head"><Icon name="search" size={20}/><label id="search-title" class="sr-only" for="search-input">搜索文章</label><input id="search-input" type="search" placeholder="搜索文章、标签或关键词…" autocomplete="off" spellcheck="false" data-search-input/><button type="submit" aria-label="关闭搜索"><kbd>ESC</kbd></button></form>
+      <div class="search-results" data-search-results aria-live="polite"></div>
+      <div class="search-help"><span><kbd>↑</kbd><kbd>↓</kbd> 选择 <kbd>↵</kbd> 打开</span><span>{posts.length} 篇文章</span></div>
+    </dialog>
+    <script type="application/json" id="search-data" set:html={JSON.stringify(searchDocs).replace(/</g, '\\u003c')} />
+    <script src="../scripts/site.ts"></script>
+  </body>
+</html>
