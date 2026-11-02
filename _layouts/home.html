@@ -14,6 +14,7 @@ layout: default
       <span class="kicker-mark" aria-hidden="true"></span>
       <span class="kicker-handle">@{{ site.profile.github | escape }}</span>
     </p>
+    <p class="hero-prompt"><span class="prompt-user">guest</span>@{{ site.profile.github | escape }}:~<span class="caret" aria-hidden="true"></span></p>
     <h1 class="hero-name">{{ person | escape }}</h1>
     {% assign role = site.profile.role | strip %}
     {% assign location = site.profile.location | strip %}
@@ -35,13 +36,14 @@ layout: default
       <p><strong>{{ site.categories.size }}</strong><span>个分类</span></p>
       {% if oldest %}<p><strong>{{ oldest.date | date: "%Y" }}</strong><span>开始记录</span></p>{% endif %}
     </aside>
+    <a class="scroll-cue" href="#featured-heading">继续阅读<span aria-hidden="true"></span></a>
   {% endif %}
 </section>
 
 {% if site.posts.size == 0 %}
   <p class="empty">还没有文章。在 <code>_posts</code> 里加一篇 Markdown，构建后就会出现在这里。</p>
 {% else %}
-  <section class="section" aria-labelledby="featured-heading">
+  <section class="section" id="featured-heading-section" data-reveal aria-labelledby="featured-heading">
     <div class="section-head">
       <h2 id="featured-heading">精选</h2>
       <a href="{{ '/archives/' | relative_url }}">全部文章</a>
@@ -77,7 +79,7 @@ layout: default
     {% endfor %}
   {% endcapture %}
   {% if recent_count > 0 %}
-    <section class="section" aria-labelledby="recent-heading">
+    <section class="section" data-reveal aria-labelledby="recent-heading">
       <div class="section-head">
         <h2 id="recent-heading">最近</h2>
         <a href="{{ '/archives/' | relative_url }}">归档</a>
@@ -90,7 +92,7 @@ layout: default
 {% endif %}
 
 {% if site.categories.size > 0 %}
-  <section class="section" aria-labelledby="topics-heading">
+  <section class="section" data-reveal aria-labelledby="topics-heading">
     <div class="section-head">
       <h2 id="topics-heading">分类</h2>
       <a href="{{ '/categories/' | relative_url }}">全部分类</a>
@@ -112,7 +114,7 @@ layout: default
   </section>
 {% endif %}
 
-<section class="section about-teaser" aria-labelledby="about-heading">
+<section class="section about-teaser" data-reveal aria-labelledby="about-heading">
   <div class="section-head">
     <h2 id="about-heading">关于</h2>
   </div>

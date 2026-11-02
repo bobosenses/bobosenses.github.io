@@ -5,6 +5,7 @@
 <meta name="theme-color" content="#0c1016" media="(prefers-color-scheme: dark)">
 <script>
 (function () {
+  document.documentElement.classList.add("js");
   try {
     var saved = localStorage.getItem("theme");
     var fallback = document.documentElement.getAttribute("data-default-theme") || "system";
