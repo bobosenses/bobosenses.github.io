@@ -145,14 +145,14 @@
   }
 
   if (toTop) {
-    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var onScroll = function () {
+    var reduceForTop = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var updateToTop = function () {
       toTop.hidden = window.scrollY < 700;
     };
-    document.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    document.addEventListener("scroll", updateToTop, { passive: true });
+    updateToTop();
     toTop.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+      window.scrollTo({ top: 0, behavior: reduceForTop ? "auto" : "smooth" });
     });
   }
 
@@ -203,4 +203,62 @@
     table.parentNode.insertBefore(wrap, table);
     wrap.appendChild(table);
   });
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var wideScreen = window.matchMedia("(min-width: 800px)");
+  var header = document.querySelector(".site-header");
+  var progress = document.querySelector("[data-scroll-progress]");
+  var revealNodes = document.querySelectorAll("[data-reveal]");
+
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealNodes.forEach(function (node) { node.classList.add("is-in"); });
+  } else {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.08 });
+    revealNodes.forEach(function (node) { observer.observe(node); });
+  }
+
+  var anchor = window.scrollY;
+  var frame = 0;
+  function onScrollFrame() {
+    var y = window.scrollY;
+    var delta = y - anchor;
+    if (header) {
+      header.classList.toggle("is-scrolled", y > 8);
+      var menuOpen = nav && nav.classList.contains("is-open");
+      if (menuOpen || y < 72) {
+        header.classList.remove("is-hidden");
+        anchor = y;
+      } else if (!reduceMotion && wideScreen.matches && delta > 28) {
+        header.classList.add("is-hidden");
+        anchor = y;
+      } else if (delta < -18) {
+        header.classList.remove("is-hidden");
+        anchor = y;
+      }
+    }
+    if (progress) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var ratio = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
+      progress.style.transform = "scaleX(" + ratio.toFixed(4) + ")";
+    }
+    frame = 0;
+  }
+
+  document.addEventListener("scroll", function () {
+    if (frame) return;
+    frame = window.requestAnimationFrame(onScrollFrame);
+  }, { passive: true });
+  onScrollFrame();
+
+  if (menuButton) {
+    menuButton.addEventListener("click", function () {
+      if (header) header.classList.remove("is-hidden");
+    });
+  }
 })();
