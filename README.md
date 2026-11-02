@@ -1,6 +1,6 @@
-# Bobo's Blog
+# yichuan's Blog
 
-Bobo 的个人空间。以 [Chánh Đại](https://chanhdai.com/) 的窄幅网格、黑白线框和紧凑排版为设计参考，使用 Astro + TypeScript 重构。
+yichuan 的个人空间。以 [Chánh Đại](https://chanhdai.com/) 的窄幅网格、黑白线框和紧凑排版为设计参考，使用 Astro + TypeScript 重构。
 
 ## 本地运行
 

@@ -1,4 +1,5 @@
 ---
+import { site } from '../site.config';
 import Base from '../layouts/Base.astro';
 import Icon from './Icon.astro';
 import { getPosts, getTerms, termUrl } from '../lib/posts';
@@ -7,4 +8,4 @@ const { kind } = Astro.props;
 const terms = getTerms(await getPosts(), kind);
 const title = kind === 'categories' ? '分类' : '标签';
 ---
-<Base title={title}><header class="page-heading"><a class="eyebrow" href="/">← BOBO / {kind.toUpperCase()}</a><h1>{title}<span class="heading-count">({terms.length})</span></h1><p>循着兴趣，找到下一篇想读的文章。</p></header><ul class:list={['term-index', kind === 'tags' && 'tag-index']}>{terms.map(([name, count]) => <li><a href={termUrl(kind, name)}><span>{kind === 'tags' && <span class="muted"># </span>}{name}</span><span class="topic-count">{count}<Icon name="arrow" size={15}/></span></a></li>)}</ul></Base>
+<Base title={title}><header class="page-heading"><a class="eyebrow" href="/">← {site.name.toUpperCase()} / {kind.toUpperCase()}</a><h1>{title}<span class="heading-count">({terms.length})</span></h1><p>循着兴趣，找到下一篇想读的文章。</p></header><ul class:list={['term-index', kind === 'tags' && 'tag-index']}>{terms.map(([name, count]) => <li><a href={termUrl(kind, name)}><span>{kind === 'tags' && <span class="muted"># </span>}{name}</span><span class="topic-count">{count}<Icon name="arrow" size={15}/></span></a></li>)}</ul></Base>

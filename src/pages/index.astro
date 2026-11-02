@@ -17,7 +17,7 @@ const tags = getTerms(posts, 'tags');
   <section class="profile-section" aria-labelledby="profile-name">
     <Blueprint />
     <div class="profile-card">
-      <div class="avatar-cell"><img class="avatar" src={site.avatar} alt="Bobo 的 GitHub 头像" width="160" height="160" fetchpriority="high"/><span class="avatar-coordinate" aria-hidden="true">Ø 160</span></div>
+      <div class="avatar-cell"><img class="avatar" src={site.avatar} alt={`${site.name} 的 GitHub 头像`} width="160" height="160" fetchpriority="high"/><span class="avatar-coordinate" aria-hidden="true">Ø 160</span></div>
       <div class="profile-title"><div class="profile-handle">PERSONAL SPACE / @{site.handle}</div><h1 id="profile-name">{site.name}<span class="name-spark" aria-hidden="true">✳</span></h1><p>{site.tagline}</p></div>
     </div>
   </section>

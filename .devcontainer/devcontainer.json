@@ -1,5 +1,5 @@
 {
-  "name": "Bobo \u00b7 Astro",
+  "name": "yichuan · Astro",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "postCreateCommand": "npm ci",
   "forwardPorts": [
