@@ -80,9 +80,6 @@ defaults:
     values:
       layout: page
 
-include:
-  - .nojekyll
-
 exclude:
   - Gemfile
   - Gemfile.lock
